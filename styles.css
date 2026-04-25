@@ -1936,3 +1936,54 @@ section[data-screen="finale"] {
   }
 }
 
+/* ─────────────────────────────────────────────
+   19. Privacy notes — 의심받기 쉬운 위치마다 배치
+   ───────────────────────────────────────────── */
+
+.privacy-note {
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  color: var(--ink-faint);
+  text-align: center;
+  max-width: 44ch;
+  margin-inline: auto;
+  word-break: keep-all;
+}
+
+.privacy-note--scan {
+  margin-top: var(--space-6);
+  opacity: 0.85;
+}
+
+.privacy-note--report {
+  margin-top: var(--space-6);
+  opacity: 0.75;
+}
+
+/* finale의 안내는 본문이 끝난 뒤 페이드인 — 타이핑 흐름을 방해 안 함 */
+.privacy-note--finale {
+  margin-top: var(--space-8);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 1200ms var(--ease-out),
+              transform 1200ms var(--ease-out);
+  font-style: italic;
+  /* 명조체 본문과 톤 차이를 두기 위해 sans + 조금 작게 */
+  font-size: 0.78rem;
+  color: rgba(60, 47, 47, 0.55);
+}
+
+.privacy-note--finale.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .privacy-note--finale {
+    transition: opacity 200ms var(--ease-out);
+    transform: none;
+  }
+}
