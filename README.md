@@ -5,8 +5,9 @@
 반전되며 사실은 "기기에게 뽀뽀하는 우리"를 비추는 짓궂은 거울이었다는 진짜 메시지를
 전한다.
 
-카메라, 마이크, 캡처된 얼굴 이미지는 전부 브라우저 안에서만 처리된다. 별도의 서버가
-없어서 어떤 데이터도 저장하거나 전송하지 않는다.
+카메라, 마이크, 캡처된 얼굴 이미지는 전부 브라우저 안에서만 처리된다. Gemini 보강은
+Vercel Function을 거쳐 점수·메트릭 텍스트만 보내며, 미디어 데이터는 저장하거나
+전송하지 않는다.
 
 ---
 
@@ -28,7 +29,7 @@ Landing  →  Scan  →  Report  →  Finale
    fade transition과 함께 결과를 마감한다. 사용자가 누를 별도 "분석 시작" 버튼은 없다.
    화면 한쪽에 _서버를 두지 않는다_ 는 안내가 노출된다.
 3. **Report** — 사랑 점수 카드 + 짧은 처방전 + `저장하기` / `다시 하기`. 그 아래에 작게
-   _결과는 어디에도 저장되지 않는다_ 는 안내, 그리고 더 작게 **서비스 의도 확인하기**
+   _미디어는 어디에도 저장되지 않는다_ 는 안내, 그리고 더 작게 **서비스 의도 확인하기**
    링크를 둔다.
 4. **Finale** — 본 작품의 클라이맥스. 다음 시퀀스가 차례로 일어난다.
    1. 리포트 카드가 1.5초에 걸쳐 페이드아웃 + 살짝 블러.
@@ -51,11 +52,15 @@ Landing  →  Scan  →  Report  →  Finale
 ├── index.html              # 4개 화면(landing/scan/report/finale) 마크업
 ├── styles.css              # 디자인 토큰, 화면 전환, 리포트 카드, 타자기·페이드 연출
 ├── app.js                  # 화면 상태머신, 센서 시작/정지, 자동 트리거, 캡처/공유
+├── package.json            # Vercel Functions용 Node 설정 + @google/genai 의존성
+├── api/
+│   └── enhance.js          # Gemini 2.5 Flash 텍스트 보강 함수
 ├── lib/
 │   ├── vision.js           # 카메라 스트림, MediaPipe Face Mesh, 거리·안정성 추정
 │   ├── audio.js            # 마이크 스트림, Web Audio 분석, 키스 사운드 감지
 │   ├── score.js            # 진정성 점수 + 성향 분류
 │   ├── report.js           # 리포트 데이터 생성 + HTML 렌더링
+│   ├── gemini.js           # API 호출, timeout, 실패 시 null 폴백
 │   ├── capture.js          # html2canvas 동적 로드 + #report-capture PNG 캡처
 │   └── finale.js           # 의도 노출 페이지: 페이드, BGM, 타자기, 공유 버튼
 ├── design/
@@ -85,6 +90,8 @@ Landing  →  Scan  →  Report  →  Finale
 - **카메라 트랙을 끊기 직전에 `captureLastVideoFrame()`이 `#video`의 마지막 프레임을
   좌우 반전해서 JPEG dataURL로 잡아 둔다.** 이 dataURL은 `state.shameImageUrl`에만
   머무르고 finale 페이지의 배경으로만 쓰인다.
+- Report 진입 직후 `lib/gemini.js`를 통해 `/api/enhance`를 백그라운드로 호출한다.
+  응답이 늦거나 실패하면 기존 정적 처방전이 그대로 유지된다.
 - `#reveal-intent-btn` 클릭 시 `runFinale({ shameImageUrl, onSwitchScreen })`을 호출.
   반드시 클릭 이벤트 동기 체인 안에서 호출해야 finale 모듈이 만드는
   `new Audio(...).play()`가 브라우저 autoplay 정책을 통과한다.
@@ -113,6 +120,18 @@ Landing  →  Scan  →  Report  →  Finale
 
 - 점수 구간별 헤드라인, 메트릭 4행 표, 가상 성능 향상 문구, 명조체 처방전을 조합해
   Report 화면에 삽입할 HTML 문자열을 만든다.
+- Gemini 보강 처방전이 도착하면 해당 문장만 HTML escaping 후 교체한다.
+
+### `lib/gemini.js`
+
+- `/api/enhance`는 2.5초 timeout으로 호출한다.
+- 실패, timeout, 응답 스키마 불일치가 있으면 `null`을 반환해 정적 UI가 그대로 동작하게 한다.
+- 전송 payload에는 점수, 성향, 거리 안정성, 피크 dB, 기기명 같은 텍스트 숫자만 들어간다.
+
+### `api/enhance.js`
+
+- `api/enhance.js`는 Gemini 2.5 Flash로 처방전과 finale 단락 6개를 JSON mode로 생성한다.
+- `GOOGLE_API_KEY`를 서버 환경변수에서만 읽고, 클라이언트로 키를 보내지 않는다.
 
 ### `lib/capture.js`
 
@@ -152,14 +171,16 @@ runFinale()
 **자기 얼굴을 카메라에 붙여 달라고 부탁한다.** 이 자체가 의심을 사기 쉬운 요청이라
 다음 원칙을 코드 레벨에서 지킨다.
 
-- **서버 없음.** 정적 파일 호스팅(Vercel)만 쓰고 백엔드/DB가 없다.
-- **외부 송신 없음.** 미디어 프레임/오디오 버퍼/캡처 이미지를 `fetch`,
-  `XMLHttpRequest`, `WebSocket`, `sendBeacon` 어디로도 보내지 않는다.
+- **미디어 송신 없음.** 카메라 프레임, 오디오 버퍼, 캡처 얼굴 이미지, 결과 카드 이미지는
+  그 어떤 외부로도 보내지 않는다.
+- **점수·메트릭 텍스트는 Gemini로 송신.** 처방전·finale 문장 생성을 위해 Vercel Function
+  경유로 점수, 카테고리, 거리 안정성, 피크 dB, 기기명만 보낸다. 응답은 텍스트이며,
+  네트워크 차단 시 정적 폴백을 쓴다.
 - **영속화 없음.** `localStorage`, `IndexedDB`, `cookie`에 미디어 데이터를 쓰지
   않는다. `state.shameImageUrl`은 메모리상의 dataURL일 뿐이고 탭이 닫히면 사라진다.
 - **외부 네트워크는 정적 자원 로딩만.** Pretendard 폰트, Nanum Myeongjo 폰트,
-  MediaPipe Face Mesh 모델, html2canvas 모듈을 CDN에서 받는다. 미디어는 이쪽으로도
-  나가지 않는다.
+  MediaPipe Face Mesh 모델, html2canvas 모듈을 CDN에서 받는다. Gemini 호출도 텍스트
+  숫자 payload만 사용하며, 미디어는 이쪽으로도 나가지 않는다.
 - **이미지 다운로드는 명시적 클릭 시에만.** 결과 카드 PNG는 사용자가 `저장하기`를
   눌렀을 때만 로컬 파일로 떨어진다.
 
@@ -197,6 +218,8 @@ http://localhost:8000
 ## 기술 스택
 
 - HTML, CSS, Vanilla JavaScript (ES Modules)
+- Vercel Functions (Node.js 22)
+- Gemini 2.5 Flash
 - MediaPipe Face Mesh (CDN)
 - Web Audio API
 - Web Share API (+ Clipboard API fallback)
@@ -208,7 +231,8 @@ http://localhost:8000
 
 ## 배포
 
-`vercel link`로 한 번 연결돼 있다.
+`vercel link`로 한 번 연결돼 있다. `GOOGLE_API_KEY`는 production/preview 환경변수로
+등록돼 있어야 한다.
 
 ```bash
 vercel deploy --prod --yes

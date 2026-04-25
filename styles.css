@@ -1131,6 +1131,12 @@ section[data-screen="report"] > .h1 {
   border-radius: var(--radius-2);
   padding: var(--space-3) var(--space-4);
   margin: 0;
+  opacity: 1;
+  transition: opacity 500ms var(--ease-out);
+}
+
+#report-body .prescription.is-updating {
+  opacity: 0;
 }
 
 /* report-body 내부 service-dev 삽입 요소 스타일 */

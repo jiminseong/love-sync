@@ -4,6 +4,7 @@ import { captureReportCard } from './lib/capture.js';
 import { startVision, stopVision, getVisionSnapshot } from './lib/vision.js';
 import { startAudio, stopAudio, getAudioSnapshot } from './lib/audio.js';
 import { runFinale, stopFinale } from './lib/finale.js';
+import { fetchEnhancement } from './lib/gemini.js';
 
 const SCREENS = ['landing', 'scan', 'report', 'finale'];
 const REPORT_COUNTUP_MS = 1200;
@@ -64,6 +65,8 @@ const state = {
   // 분석이 끝나는 순간 캡처해 두는 사용자 얼굴 dataURL.
   // finale 페이지의 흑백·블러 배경으로만 쓰이고, 어디로도 송신/저장되지 않는다.
   shameImageUrl: null,
+  lastEnhancement: null,
+  enhancementRequestId: 0,
 };
 
 function setScreen(name) {
@@ -414,8 +417,34 @@ function animateScoreCountup(targetScore) {
   state.countupRaf = requestAnimationFrame(tick);
 }
 
+function buildEnhancementPayload(result, report) {
+  return {
+    score: report.score,
+    personality: result.personality,
+    distanceStability: Number(result.distanceStability.toFixed(3)),
+    audioPeakDb: Number(result.audioPeakDb.toFixed(1)),
+    deviceName: getFinaleDeviceName(),
+  };
+}
+
+function replacePrescription(text) {
+  const node = document.querySelector('#report-body .prescription');
+  if (!node || !text) return;
+
+  node.classList.add('is-updating');
+  setTimeout(() => {
+    node.textContent = text;
+    requestAnimationFrame(() => {
+      node.classList.remove('is-updating');
+    });
+  }, 220);
+}
+
 function renderReport(result) {
   const report = generateReport(result);
+  const enhancementRequestId = state.enhancementRequestId + 1;
+  state.enhancementRequestId = enhancementRequestId;
+  state.lastEnhancement = null;
 
   const scoreNode = document.querySelector('#report-score');
   if (scoreNode) scoreNode.textContent = '0';
@@ -430,6 +459,16 @@ function renderReport(result) {
   if (dateNode) dateNode.textContent = `${report.date}`;
 
   animateScoreCountup(report.score);
+
+  const enhancementPayload = buildEnhancementPayload(result, report);
+  fetchEnhancement(enhancementPayload).then((enhancement) => {
+    if (!enhancement || state.enhancementRequestId !== enhancementRequestId) return;
+    state.lastEnhancement = enhancement;
+    if (state.current === 'report') {
+      replacePrescription(enhancement.prescription);
+    }
+  });
+
 }
 
 function onVisionUpdate(update) {
@@ -515,6 +554,8 @@ function goLanding() {
   state.audio.rmsDb = -60;
   state.audio.kissDetected = false;
   state.shameImageUrl = null;
+  state.lastEnhancement = null;
+  state.enhancementRequestId += 1;
   writeSensor('camera', '대기');
   writeSensor('mic', '대기');
   writeSensor('distance', '—');
@@ -540,6 +581,7 @@ function handleRevealIntent() {
   runFinale({
     shameImageUrl: state.shameImageUrl,
     deviceName: getFinaleDeviceName(),
+    dynamicSegments: state.lastEnhancement?.finaleSegments || null,
     onSwitchScreen: () => {
       setScreen('finale');
     },

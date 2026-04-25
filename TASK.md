@@ -171,9 +171,17 @@ type AnalysisResult = {
 
 ---
 
+### S8. Gemini 보강 — Vercel Functions + 텍스트 폴백
+- [x] Backend 도입: `package.json`, `package-lock.json`, `api/enhance.js`, `vercel.json`
+- [x] 텍스트 보강: Report 처방전과 finale 6단락을 Gemini 2.5 Flash로 생성, 실패 시 정적 템플릿 유지
+- [x] 프라이버시 검증: API payload에 점수·메트릭·기기명 텍스트만 포함, 미디어 dataURL 전송 없음
+- [ ] 배포: `GOOGLE_API_KEY` production/preview 등록 후 production 배포 및 라이브 API 상태 확인
+
+---
+
 ## 4. 프라이버시 체크리스트 (배포 전 필수)
 - [ ] 코드 전체에서 카메라/오디오 버퍼를 `fetch`/`XHR`/`WebSocket`/`sendBeacon`으로 전송하는 코드 없음
-- [ ] 외부 호출은 (1) MediaPipe 모델 가중치 (2) 폰트/CSS만
+- [ ] 외부 호출은 (1) MediaPipe 모델 가중치 (2) 폰트/CSS (3) 점수·메트릭 텍스트만 담은 Gemini Function 호출뿐
 - [ ] localStorage/IndexedDB에 미디어 데이터 저장 없음
 - [ ] Landing 화면에 "모든 분석은 브라우저 안에서만" 고지문 표시
 
