@@ -5,16 +5,47 @@ import { startVision, stopVision, getVisionSnapshot } from './lib/vision.js';
 import { startAudio, stopAudio, getAudioSnapshot } from './lib/audio.js';
 import { runFinale, stopFinale } from './lib/finale.js';
 
-const SCREENS = ['landing', 'scan', 'action', 'report', 'finale'];
-const ANALYSIS_DURATION_MS = 3200;
-const SCAN_TO_ACTION_DELAY_MS = 900;
+const SCREENS = ['landing', 'scan', 'report', 'finale'];
 const REPORT_COUNTUP_MS = 1200;
+
+// scan 화면 자동 트리거 임계값.
+// proximity는 0(멀다)~1(가깝다) 범위.
+// proximityToCm = 12 - p*10  →  p=0.7이 5cm. 5cm 이하에서만 발동.
+const PROXIMITY_TRIGGER = 0.7;
+// proximity가 임계 근처(>= NEAR)면 안내 라벨을 "쪽 소리 들으면 끝낼게"로 바꿔 준다.
+const PROXIMITY_NEAR = 0.45;
+// 트리거 후 화면이 fade되는 시간. 너무 길면 흐름이 끊기고, 너무 짧으면 어색.
+const SCAN_FINALIZE_FADE_MS = 800;
+
+// 토스트 판정용 dB 임계.
+// LOUD: detectKiss가 잡는 어택 임계와 같음 (lib/audio.js의 KISS_THRESHOLD_DB).
+// WEAK: 약한 시도(쪽 비슷한데 소리만 부족)를 잡아 안내 토스트로 유도.
+const LOUD_KISS_DB = -32;
+const WEAK_KISS_DB = -40;
+
+const TOAST_VISIBLE_MS = 1600;
+const TOAST_COOLDOWN_MS = 1800;
+
+const SCAN_PHASES = {
+  warmup:     '잠깐 준비할게',
+  ready:      '입술 가까이 가져와봐',
+  listening:  '쪽 소리 들으면 끝낼게',
+  finalizing: '잡았다, 잠시만',
+};
 
 const state = {
   current: 'landing',
-  analysisTimer: null,
-  analysisRaf: null,
+  scanRaf: null,
+  finalizeTimer: null,
   countupRaf: null,
+  toastTimer: null,
+  lastToast: { kind: null, at: 0 },
+  scanSamples: {
+    stability: [],
+    proximity: [],
+    peakDb: [],
+  },
+  scanTriggered: false,
   vision: {
     active: false,
     fallback: false,
@@ -121,29 +152,9 @@ function getFinaleDeviceName() {
   return profile.name && profile.name !== '네 기기' ? profile.name : null;
 }
 
-function setProgress(ratio) {
-  const bar = document.querySelector('#progress-bar');
-  if (!bar) return;
-  const pct = Math.max(0, Math.min(1, ratio)) * 100;
-  bar.style.width = `${pct}%`;
-  bar.setAttribute('aria-valuenow', String(Math.round(pct)));
-}
-
-function setProgressLabel(text) {
-  const label = document.querySelector('#progress-label');
-  if (!label) return;
-  label.textContent = text;
-}
-
 function proximityToCm(proximity) {
   const p = Math.max(0, Math.min(1, proximity || 0));
   return (12 - p * 10).toFixed(1);
-}
-
-function writeMetric(key, value) {
-  document.querySelectorAll(`[data-metric="${key}"]`).forEach((el) => {
-    el.textContent = value;
-  });
 }
 
 function writeSensor(key, value) {
@@ -152,34 +163,59 @@ function writeSensor(key, value) {
   });
 }
 
+function setScanPhase(name) {
+  const node = document.querySelector('#scan-status');
+  if (!node) return;
+  if (node.dataset.phase === name) return;
+  node.dataset.phase = name;
+  const text = SCAN_PHASES[name] || SCAN_PHASES.warmup;
+  node.innerHTML = `${text} <span class="heart" aria-hidden="true">♥</span>`;
+}
+
+/**
+ * scan 화면 하단에 짧은 안내 토스트를 띄운다.
+ * 같은 종류(kind)는 TOAST_COOLDOWN_MS 안에 다시 띄우지 않아 시끄럽지 않게 한다.
+ */
+function showScanToast(text, kind) {
+  if (state.scanTriggered) return;
+  const node = document.querySelector('#scan-toast');
+  if (!node) return;
+  const now = performance.now();
+  if (
+    state.lastToast.kind === kind &&
+    now - state.lastToast.at < TOAST_COOLDOWN_MS
+  ) {
+    return;
+  }
+  state.lastToast = { kind, at: now };
+  node.textContent = text;
+  node.dataset.visible = 'true';
+  if (state.toastTimer) clearTimeout(state.toastTimer);
+  state.toastTimer = setTimeout(() => {
+    node.dataset.visible = 'false';
+    state.toastTimer = null;
+  }, TOAST_VISIBLE_MS);
+}
+
+function hideScanToast() {
+  const node = document.querySelector('#scan-toast');
+  if (node) node.dataset.visible = 'false';
+  if (state.toastTimer) {
+    clearTimeout(state.toastTimer);
+    state.toastTimer = null;
+  }
+  state.lastToast = { kind: null, at: 0 };
+}
+
 function updateVisionMetrics() {
   const v = state.vision;
-  writeMetric('distance', `${proximityToCm(v.proximity)} cm`);
-  writeMetric('stability', v.distanceStability.toFixed(2));
-  writeMetric('tremor', (1 - v.distanceStability).toFixed(2));
   writeSensor('distance', `${proximityToCm(v.proximity)} cm`);
 }
 
 function updateAudioMetrics() {
   const a = state.audio;
   const peak = isFinite(a.peakDb) ? a.peakDb : -60;
-  writeMetric('db', `${peak.toFixed(1)} dB`);
   writeSensor('db', `${peak.toFixed(1)} dB`);
-}
-
-function updateActionMetricsMock(ratio) {
-  const v = state.vision;
-  const a = state.audio;
-
-  if (!v.active) {
-    writeMetric('distance', `${(3.2 - ratio * 1.6).toFixed(1)} cm`);
-    writeMetric('stability', (0.2 + ratio * 0.7).toFixed(2));
-    writeMetric('tremor', (0.4 - ratio * 0.28).toFixed(2));
-  }
-
-  if (!a.active) {
-    writeMetric('db', `${(-45 + ratio * 25).toFixed(1)} dB`);
-  }
 }
 
 /**
@@ -210,80 +246,148 @@ function captureLastVideoFrame() {
   }
 }
 
-function clearAnalysisTimers() {
-  if (state.analysisTimer) {
-    clearTimeout(state.analysisTimer);
-    state.analysisTimer = null;
+function cancelScanWatch() {
+  if (state.scanRaf) {
+    cancelAnimationFrame(state.scanRaf);
+    state.scanRaf = null;
   }
-  if (state.analysisRaf) {
-    cancelAnimationFrame(state.analysisRaf);
-    state.analysisRaf = null;
+  if (state.finalizeTimer) {
+    clearTimeout(state.finalizeTimer);
+    state.finalizeTimer = null;
   }
+  state.scanTriggered = false;
+  state.scanSamples.stability.length = 0;
+  state.scanSamples.proximity.length = 0;
+  state.scanSamples.peakDb.length = 0;
+
+  const scanSection = document.querySelector('section[data-screen="scan"]');
+  if (scanSection) scanSection.dataset.finalizing = 'false';
+
+  hideScanToast();
 }
 
-function runAnalysisSequence(onDone) {
-  clearAnalysisTimers();
-  setProgress(0);
-  setProgressLabel('사랑 측정 중... ♥');
+/**
+ * scan 화면 진입 후 매 프레임 표본을 누적하면서, proximity와 kissDetected가
+ * 동시에 충족되는 순간 한 번만 finalizeScan을 호출한다.
+ */
+function startScanWatch() {
+  cancelScanWatch();
 
-  const start = performance.now();
-  const stages = [
-    { at: 0.0, text: '사랑 측정 중... ♥' },
-    { at: 0.25, text: '입술 위치 잡는 중...' },
-    { at: 0.5, text: '소리 듣는 중...' },
-    { at: 0.75, text: '점수 계산 중...' },
-  ];
-  let stageIdx = 0;
+  const tick = () => {
+    if (state.scanTriggered) return;
 
-  const stabilitySamples = [];
-  const proximitySamples = [];
-  const peakDbSamples = [];
-  let kissCount = 0;
+    const v = state.vision;
+    const a = state.audio;
 
-  const tick = (now) => {
-    const elapsed = now - start;
-    const ratio = Math.min(1, elapsed / ANALYSIS_DURATION_MS);
-    setProgress(ratio);
-    updateActionMetricsMock(ratio);
-
-    if (state.vision.active) {
-      stabilitySamples.push(state.vision.distanceStability);
-      proximitySamples.push(state.vision.proximity);
+    if (v.active) {
+      state.scanSamples.stability.push(v.distanceStability);
+      state.scanSamples.proximity.push(v.proximity);
     }
-    if (state.audio.active && isFinite(state.audio.peakDb)) {
-      peakDbSamples.push(state.audio.peakDb);
-      if (state.audio.kissDetected) {
-        kissCount++;
-        state.audio.kissDetected = false;
+    if (a.active && isFinite(a.peakDb)) {
+      state.scanSamples.peakDb.push(a.peakDb);
+    }
+
+    // phase 라벨 갱신 — 시각적 가이드
+    if (v.proximity >= PROXIMITY_NEAR && a.active) {
+      setScanPhase('listening');
+    } else if ((v.active || v.fallback) && (a.active || a.fallback)) {
+      setScanPhase('ready');
+    }
+
+    // 강한 어택(detectKiss로 잡힌 "쪽")이 들어왔을 때 — 한 번에 처리.
+    if (a.kissDetected) {
+      a.kissDetected = false;
+      if (v.proximity >= PROXIMITY_TRIGGER) {
+        // 거리 + 소리 동시 충족 → 트리거.
+        state.scanTriggered = true;
+        state.scanRaf = null;
+        hideScanToast();
+        finalizeScan();
+        return;
       }
+      // 소리는 충분한데 거리가 부족.
+      showScanToast('소리는 충분한데 좀더 가까이와!', 'too-far');
+    } else if (
+      isFinite(a.peakDb) &&
+      a.peakDb >= WEAK_KISS_DB &&
+      a.peakDb < LOUD_KISS_DB &&
+      v.proximity >= PROXIMITY_TRIGGER
+    ) {
+      // 거리는 충분한데 소리가 약함.
+      showScanToast('소리가 너무 작아!', 'too-quiet');
     }
 
-    while (stageIdx < stages.length && ratio >= stages[stageIdx].at) {
-      setProgressLabel(stages[stageIdx].text);
-      stageIdx++;
-    }
-
-    if (ratio < 1) {
-      state.analysisRaf = requestAnimationFrame(tick);
-    } else {
-      state.analysisRaf = null;
-      state.analysisTimer = setTimeout(() => {
-        state.analysisTimer = null;
-        const avg = (arr) =>
-          arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
-        const max = (arr) => (arr.length ? Math.max(...arr) : null);
-        onDone({
-          avgStability: avg(stabilitySamples),
-          avgProximity: avg(proximitySamples),
-          avgPeakDb: avg(peakDbSamples),
-          maxPeakDb: max(peakDbSamples),
-          kissCount,
-        });
-      }, 600);
-    }
+    state.scanRaf = requestAnimationFrame(tick);
   };
 
-  state.analysisRaf = requestAnimationFrame(tick);
+  state.scanRaf = requestAnimationFrame(tick);
+}
+
+/**
+ * 트리거 발동 → 짧은 fade out → 그동안 누적한 표본으로 결과 계산 → report로.
+ */
+function finalizeScan() {
+  setScanPhase('finalizing');
+  const scanSection = document.querySelector('section[data-screen="scan"]');
+  if (scanSection) scanSection.dataset.finalizing = 'true';
+
+  state.finalizeTimer = setTimeout(() => {
+    state.finalizeTimer = null;
+
+    const samples = state.scanSamples;
+    const avg = (arr) =>
+      arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+    const max = (arr) => (arr.length ? Math.max(...arr) : null);
+
+    const visionSnap = getVisionSnapshot();
+    const audioSnap = getAudioSnapshot();
+
+    const stability =
+      avg(samples.stability) != null
+        ? avg(samples.stability)
+        : visionSnap.distanceStability;
+
+    const avgPeak = avg(samples.peakDb);
+    const maxPeak = max(samples.peakDb);
+    const audioPeakDb =
+      avgPeak != null && maxPeak != null
+        ? avgPeak * 0.5 + maxPeak * 0.5
+        : audioSnap.peakDb != null
+        ? audioSnap.peakDb
+        : -45;
+
+    const visionReal = state.vision.active && !state.vision.fallback;
+    const audioReal = state.audio.active && !state.audio.fallback;
+
+    let result;
+    if (visionReal || audioReal) {
+      result = computeResult({
+        distanceStability: stability,
+        audioPeakDb,
+        kissDetected: true,
+      });
+    } else {
+      const dummy = generateDummyResult();
+      result = {
+        ...dummy,
+        distanceStability: Number(stability.toFixed(3)),
+      };
+    }
+
+    // 카메라 트랙을 끊기 직전에 마지막 프레임을 잡아둔다.
+    // finale 페이지의 흑백·블러 배경으로만 쓰이고 외부로 나가지 않는다.
+    state.shameImageUrl = captureLastVideoFrame();
+
+    stopVision();
+    stopAudio();
+    state.vision.active = false;
+    state.audio.active = false;
+
+    if (scanSection) scanSection.dataset.finalizing = 'false';
+
+    renderReport(result);
+    setScreen('report');
+  }, SCAN_FINALIZE_FADE_MS);
 }
 
 function animateScoreCountup(targetScore) {
@@ -375,80 +479,26 @@ async function beginAudioCapture() {
   }
 }
 
+/**
+ * Landing의 "지금 뽀뽀하러 가기" 클릭 핸들러.
+ * 카메라+마이크를 동시에 시작하고, scan 화면에서 자동 트리거 watch를 켠다.
+ * 별도의 "허용하고 시작" 단계는 두지 않는다 — 흐름을 끊지 않기 위해서.
+ */
 function goScan() {
   setScreen('scan');
+  setScanPhase('warmup');
+  // 둘 다 비동기로 시작 — 권한 다이얼로그가 두 번 떠도 사용자는 한 번에 처리한다.
   beginVisionPreview();
-}
-
-function goActionFromScan() {
   beginAudioCapture();
-
-  console.info('[ppoppoppo] scan→action: scheduling in', SCAN_TO_ACTION_DELAY_MS, 'ms');
-  setTimeout(() => {
-    console.info('[ppoppoppo] entering action screen, analysis duration:', ANALYSIS_DURATION_MS, 'ms');
-    setScreen('action');
-    runAnalysisSequence((samples) => {
-      console.info('[ppoppoppo] analysis complete', samples);
-      const visionSnap = getVisionSnapshot();
-      const audioSnap = getAudioSnapshot();
-
-      const stability =
-        samples && samples.avgStability != null
-          ? samples.avgStability
-          : visionSnap.distanceStability;
-
-      const avgPeak = samples && samples.avgPeakDb != null ? samples.avgPeakDb : null;
-      const maxPeak = samples && samples.maxPeakDb != null ? samples.maxPeakDb : null;
-      const audioPeakDb =
-        avgPeak != null && maxPeak != null
-          ? avgPeak * 0.5 + maxPeak * 0.5
-          : audioSnap.peakDb != null
-          ? audioSnap.peakDb
-          : -45;
-
-      const kissDetected = Boolean(samples && samples.kissCount > 0);
-
-      const visionReal = state.vision.active && !state.vision.fallback;
-      const audioReal = state.audio.active && !state.audio.fallback;
-
-      let result;
-      if (visionReal || audioReal) {
-        result = computeResult({
-          distanceStability: stability,
-          audioPeakDb,
-          kissDetected,
-        });
-      } else {
-        const dummy = generateDummyResult();
-        result = {
-          ...dummy,
-          distanceStability: Number(stability.toFixed(3)),
-        };
-      }
-
-      // 카메라 트랙을 끊기 직전에 마지막 프레임을 잡아둔다.
-      // finale 페이지의 흑백·블러 배경으로만 쓰이고 외부로 나가지 않는다.
-      state.shameImageUrl = captureLastVideoFrame();
-
-      stopVision();
-      stopAudio();
-      state.vision.active = false;
-      state.audio.active = false;
-
-      renderReport(result);
-      setScreen('report');
-    });
-  }, SCAN_TO_ACTION_DELAY_MS);
+  startScanWatch();
 }
 
 function goLanding() {
-  clearAnalysisTimers();
+  cancelScanWatch();
   if (state.countupRaf) {
     cancelAnimationFrame(state.countupRaf);
     state.countupRaf = null;
   }
-  setProgress(0);
-  setProgressLabel('사랑 측정 중... ♥');
   stopVision();
   stopAudio();
   state.vision.active = false;
@@ -463,6 +513,7 @@ function goLanding() {
   writeSensor('mic', '대기');
   writeSensor('distance', '—');
   writeSensor('db', '—');
+  setScanPhase('warmup');
   setScreen('landing');
 }
 
@@ -528,9 +579,6 @@ async function handleSaveClick() {
 function bindEvents() {
   const startBtn = document.querySelector('#start-btn');
   if (startBtn) startBtn.addEventListener('click', goScan);
-
-  const permissionBtn = document.querySelector('#permission-btn');
-  if (permissionBtn) permissionBtn.addEventListener('click', goActionFromScan);
 
   const saveBtn = document.querySelector('#save-btn');
   if (saveBtn) saveBtn.addEventListener('click', handleSaveClick);

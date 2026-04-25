@@ -86,14 +86,16 @@
        ====================================================== -->
   <section data-screen="scan">
     <header class="caption-row">
-      <span class="caption">1 / 3</span>
+      <span class="caption">1 / 2</span>
     </header>
 
-    <h1 class="h1">잠깐 준비할게 <span class="heart" aria-hidden="true">♥</span></h1>
+    <h1 id="scan-status" class="h1" data-phase="warmup">
+      잠깐 준비할게 <span class="heart" aria-hidden="true">♥</span>
+    </h1>
 
     <div class="scan-grid">
       <figure class="preview">
-        <div class="video-wrap">
+        <div class="video-wrap" data-scan-active="false">
           <video
             id="video"
             autoplay
@@ -131,134 +133,37 @@
     </div>
 
     <p class="lede scan-lede">
-      입술을 가이드에 맞춰봐.<br />
-      1~3cm 떨어져서, 천천히.
+      입술을 가이드에 가까이 가져오고,<br />
+      가볍게 "쪽" — 그 순간 자동으로 끝낼게.
     </p>
-
-    <button id="permission-btn" class="btn btn--accent btn--pill" type="button">
-      허용하고 시작 <span aria-hidden="true">→</span>
-    </button>
 
     <p class="privacy-note privacy-note--scan">
-      뽀뽀뽀는 별도의 서버를 두지 않습니다.<br />
-      카메라·마이크로 들어온 모든 데이터는 사용자의 기기 안에서만 처리되며,<br />
+      뽀뽀뽀는 별도의 서버를 두지 않습니다.
+      카메라·마이크로 들어온 모든 데이터는 사용자의 기기 안에서만 처리되며,
       어디에도 저장되거나 전송되지 않습니다.
     </p>
+
+    <!-- 트리거 발동 시 짧은 fade overlay (JS가 토글) -->
+    <div class="scan-finalize" aria-hidden="true"></div>
+
+    <!-- 거리/소리 안내 토스트 -->
+    <div
+      id="scan-toast"
+      class="scan-toast"
+      role="status"
+      aria-live="polite"
+      data-visible="false"
+    ></div>
   </section>
 
-  <!-- ======================================================
-       SCREEN 3 · ACTION
-       ====================================================== -->
-  <section data-screen="action">
-    <!-- 배경 장식: dotted grid + crosshair (aria-hidden, CSS only) -->
-    <div class="action-bg-grid" aria-hidden="true"></div>
-    <header class="caption-row">
-      <span class="caption">2 / 3</span>
-    </header>
-
-    <h1 id="progress-label" class="h1">사랑 측정 중... <span class="heart" aria-hidden="true">♥</span></h1>
-
-    <div class="progress">
-      <div class="progress__track">
-        <div id="progress-bar" class="progress__fill" style="width: 0%"></div>
-      </div>
-      <div class="progress__ticks">
-        <span class="caption">0%</span>
-        <span class="caption">100%</span>
-      </div>
-    </div>
-
-    <figure class="waveform">
-      <!-- CSS-only spectrum overlay (publisher) — service-dev가 canvas에 실제 파형 그릴 때까지 시각 fallback -->
-      <div class="spectrum-overlay" aria-hidden="true">
-        <div class="spectrum-grid" aria-hidden="true">
-          <!-- Y축 눈금 라벨 -->
-          <span class="spectrum-grid__label spectrum-grid__label--top">+1.0</span>
-          <span class="spectrum-grid__label spectrum-grid__label--mid">0.0</span>
-          <span class="spectrum-grid__label spectrum-grid__label--bot">−1.0</span>
-          <!-- CSS 애니메이션 sine-wave 라인 -->
-          <svg class="spectrum-wave" viewBox="0 0 1200 160" preserveAspectRatio="none" aria-hidden="true">
-            <path class="spectrum-wave__path spectrum-wave__path--base" d="" />
-            <path class="spectrum-wave__path spectrum-wave__path--harmonic" d="" />
-          </svg>
-          <!-- CSS keyframes 스펙트럼 바 -->
-          <div class="spectrum-bars" aria-hidden="true">
-            <div class="spectrum-bar" style="--bar-delay:0ms;   --bar-h: 0.55"></div>
-            <div class="spectrum-bar" style="--bar-delay:60ms;  --bar-h: 0.72"></div>
-            <div class="spectrum-bar" style="--bar-delay:120ms; --bar-h: 0.38"></div>
-            <div class="spectrum-bar" style="--bar-delay:180ms; --bar-h: 0.88"></div>
-            <div class="spectrum-bar" style="--bar-delay:240ms; --bar-h: 0.61"></div>
-            <div class="spectrum-bar" style="--bar-delay:300ms; --bar-h: 0.45"></div>
-            <div class="spectrum-bar" style="--bar-delay:360ms; --bar-h: 0.79"></div>
-            <div class="spectrum-bar" style="--bar-delay:420ms; --bar-h: 0.52"></div>
-            <div class="spectrum-bar" style="--bar-delay:480ms; --bar-h: 0.66"></div>
-            <div class="spectrum-bar" style="--bar-delay:540ms; --bar-h: 0.41"></div>
-            <div class="spectrum-bar" style="--bar-delay:600ms; --bar-h: 0.83"></div>
-            <div class="spectrum-bar" style="--bar-delay:660ms; --bar-h: 0.57"></div>
-            <div class="spectrum-bar" style="--bar-delay:720ms; --bar-h: 0.70"></div>
-            <div class="spectrum-bar" style="--bar-delay:780ms; --bar-h: 0.34"></div>
-            <div class="spectrum-bar" style="--bar-delay:840ms; --bar-h: 0.91"></div>
-            <div class="spectrum-bar" style="--bar-delay:900ms; --bar-h: 0.48"></div>
-            <div class="spectrum-bar" style="--bar-delay:960ms; --bar-h: 0.63"></div>
-            <div class="spectrum-bar" style="--bar-delay:1020ms;--bar-h: 0.77"></div>
-            <div class="spectrum-bar" style="--bar-delay:1080ms;--bar-h: 0.50"></div>
-            <div class="spectrum-bar" style="--bar-delay:1140ms;--bar-h: 0.86"></div>
-            <div class="spectrum-bar" style="--bar-delay:1200ms;--bar-h: 0.42"></div>
-            <div class="spectrum-bar" style="--bar-delay:1260ms;--bar-h: 0.68"></div>
-            <div class="spectrum-bar" style="--bar-delay:1320ms;--bar-h: 0.75"></div>
-            <div class="spectrum-bar" style="--bar-delay:1380ms;--bar-h: 0.59"></div>
-            <div class="spectrum-bar" style="--bar-delay:1440ms;--bar-h: 0.80"></div>
-            <div class="spectrum-bar" style="--bar-delay:1500ms;--bar-h: 0.36"></div>
-            <div class="spectrum-bar" style="--bar-delay:1560ms;--bar-h: 0.93"></div>
-            <div class="spectrum-bar" style="--bar-delay:1620ms;--bar-h: 0.47"></div>
-            <div class="spectrum-bar" style="--bar-delay:1680ms;--bar-h: 0.64"></div>
-            <div class="spectrum-bar" style="--bar-delay:1740ms;--bar-h: 0.71"></div>
-          </div>
-        </div>
-      </div>
-      <canvas id="waveform-canvas" width="1200" height="160" aria-hidden="true"></canvas>
-      <figcaption class="caption">뽀뽀 파형</figcaption>
-    </figure>
-
-    <dl class="metrics">
-      <div class="metrics__cell">
-        <dt class="caption">거리</dt>
-        <dd class="metrics__value" data-metric="distance">—</dd>
-      </div>
-      <div class="metrics__cell">
-        <dt class="caption">안정성</dt>
-        <dd class="metrics__value" data-metric="stability">—</dd>
-      </div>
-      <div class="metrics__cell">
-        <dt class="caption">소리</dt>
-        <dd class="metrics__value" data-metric="db">—</dd>
-      </div>
-      <div class="metrics__cell">
-        <dt class="caption">떨림</dt>
-        <dd class="metrics__value" data-metric="tremor">—</dd>
-      </div>
-    </dl>
-
-    <p class="caption action-footer-caption">
-      1~3cm 거리에서 화면에 가볍게 뽀뽀해봐.
-    </p>
-
-    <!-- 비디오 썸네일 (Action 화면 우상단) -->
-    <video
-      class="action-thumb"
-      autoplay
-      playsinline
-      muted
-      aria-hidden="true"
-    ></video>
-  </section>
+  <!-- (Action 화면 제거됨 — scan 안에서 자동 트리거 후 곧장 report로 페이드) -->
 
   <!-- ======================================================
-       SCREEN 4 · REPORT
+       SCREEN 3 · REPORT
        ====================================================== -->
   <section data-screen="report">
     <header class="caption-row">
-      <span class="caption">3 / 3</span>
+      <span class="caption">2 / 2</span>
     </header>
 
     <h1 class="h1">결과 나왔어 <span class="heart" aria-hidden="true">♥</span></h1>
@@ -323,7 +228,7 @@
   </section>
 
   <!-- ======================================================
-       SCREEN 5 · FINALE
+       SCREEN 4 · FINALE
        "서비스 의도 확인하기" 클릭 후 등장하는 감동(?) 페이지.
        텍스트는 lib/finale.js가 타자기 효과로 채워 넣음.
        ====================================================== -->
