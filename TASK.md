@@ -76,51 +76,89 @@ type AnalysisResult = {
 ## 3. Task 상세
 
 ### S0. 디자인 시스템 — `designer`
-- [ ] `design/tokens.md`: 컬러(다크 베이스 + 1 accent), 폰트(serif 헤드라인 + mono 본문 권장), 간격 스케일
-- [ ] `design/screens.md`: 4화면(Landing/Scan/Action/Report) 와이어프레임 텍스트 기술
-- [ ] 톤 가이드: "스티브 잡스 키노트 + 가짜 과학 논문" — 여백 많이, 글자 크게, 장식 최소
-- [ ] 리포트 카드 레이아웃 (이미지 저장 시 정사각/9:16 SNS 친화적)
+- [x] `design/tokens.md`: 컬러(다크 베이스 + 1 accent), 폰트(serif 헤드라인 + mono 본문 권장), 간격 스케일
+- [x] `design/screens.md`: 4화면(Landing/Scan/Action/Report) 와이어프레임 텍스트 기술
+- [x] 톤 가이드: "스티브 잡스 키노트 + 가짜 과학 논문" — 여백 많이, 글자 크게, 장식 최소
+- [x] 리포트 카드 레이아웃 (이미지 저장 시 정사각/9:16 SNS 친화적)
 
 ### S1. 퍼블리싱 — `publisher`
-- [ ] `index.html`: 4 `<section data-screen>` 구조
-- [ ] `styles.css`: 디자인 토큰 CSS 변수화, 화면 전환은 `[data-active-screen]` 속성 셀렉터로
-- [ ] 권한 고지문, 프라이버시 1줄 카피 (Landing 하단 고정)
-- [ ] 리포트 카드는 `html2canvas`로 캡처 가능한 격리된 컨테이너로 마크업
+- [x] `index.html`: 4 `<section data-screen>` 구조
+- [x] `styles.css`: 디자인 토큰 CSS 변수화, 화면 전환은 `[data-active-screen]` 속성 셀렉터로
+- [x] 권한 고지문, 프라이버시 1줄 카피 (Landing 하단 고정)
+- [x] 리포트 카드는 `html2canvas`로 캡처 가능한 격리된 컨테이너로 마크업
 
 ### S1'. 코어 로직 골격 — `service-dev` (병렬)
-- [ ] `app.js`: 화면 전환 상태머신 (landing → scan → action → report)
-- [ ] `lib/report.js`: 템플릿 배열 기반 리포트 생성기 (`generateReport(result)`)
-- [ ] `lib/score.js`: 더미 점수 생성기 (현 단계는 `Math.random()`)
-- [ ] 통합 테스트: Landing 버튼 → 2초 후 Report 표시 (mock)
+- [x] `app.js`: 화면 전환 상태머신 (landing → scan → action → report)
+- [x] `lib/report.js`: 템플릿 배열 기반 리포트 생성기 (`generateReport(result)`)
+- [x] `lib/score.js`: 더미 점수 생성기 (현 단계는 `Math.random()`)
+- [x] 통합 테스트: Landing 버튼 → 2초 후 Report 표시 (mock)
 
 ### S2. 1차 통합 — `service-dev`
-- [ ] 더미값으로 풀 플로우 작동 확인
-- [ ] **이 시점에 데모 가능한 상태가 보장되어야 함**
+- [x] 더미값으로 풀 플로우 작동 확인
+- [x] **이 시점에 데모 가능한 상태가 보장되어야 함**
 
 ### S3. Vision — `service-dev`
-- [ ] `lib/vision.js`: MediaPipe Face Mesh CDN 로드, `getUserMedia({video:true})`
-- [ ] 입술 랜드마크(13, 14, 78, 308) 추출 → 화면 대비 얼굴 박스 비율로 거리 역산
-- [ ] 안정성: 최근 30프레임 거리값 표준편차 → `distanceStability`
-- [ ] **프라이버시 검증:** `fetch`/`XHR`로 프레임 데이터 송신하는 코드가 0줄인지 코드 리뷰
+- [x] `lib/vision.js`: MediaPipe Face Mesh CDN 로드, `getUserMedia({video:true})`
+- [x] 입술 랜드마크(13, 14, 78, 308) 추출 → 화면 대비 얼굴 박스 비율로 거리 역산
+- [x] 안정성: 최근 30프레임 거리값 표준편차 → `distanceStability`
+- [x] **프라이버시 검증:** `fetch`/`XHR`로 프레임 데이터 송신하는 코드가 0줄인지 코드 리뷰
 
 ### S4. Audio — `service-dev`
-- [ ] `lib/audio.js`: `getUserMedia({audio:true})` + `AnalyserNode`
-- [ ] 매 프레임 RMS/피크 dB 계산, 짧은 어택(< 200ms) 감지로 "쪽" 검출
-- [ ] `score.js`: `(distanceStability * 0.6 + audioPeak * 0.4) * 100` 같은 가중합으로 진정성 점수 산출
+- [x] `lib/audio.js`: `getUserMedia({audio:true})` + `AnalyserNode`
+- [x] 매 프레임 RMS/피크 dB 계산, 짧은 어택(< 200ms) 감지로 "쪽" 검출
+- [x] `score.js`: `(distanceStability * 0.6 + audioPeak * 0.4) * 100` 같은 가중합으로 진정성 점수 산출
 
 ### S5. 연출 — `publisher` + `designer`
-- [ ] 분석 중 가짜 그래프 (Canvas 또는 CSS 애니메이션 sine wave)
-- [ ] 화면 전환 트랜지션 (fade, blur)
+- [x] 분석 중 가짜 그래프 (Canvas 또는 CSS 애니메이션 sine wave)
+- [x] 화면 전환 트랜지션 (fade, blur)
 - [ ] 시간 남으면: 미세한 효과음 (분석 시작/완료 비프)
 
 ### S6. 배포 — 전원 (완전 자동화)
-- [ ] `.gitignore` 작성 (`.claude/settings.local.json`, `node_modules`, `.vercel`, `.DS_Store` 포함)
-- [ ] `git init && git add . && git commit -m "init: love-sync MVP"`
-- [ ] `gh repo create love-sync --public --source=. --remote=origin --push` (계정: jiminseong)
-- [ ] `vercel link` → `vercel deploy --prod --yes` (정적 배포)
+- [x] `.gitignore` 작성 (`.claude/settings.local.json`, `node_modules`, `.vercel`, `.DS_Store` 포함)
+- [x] `git init && git add . && git commit -m "init: love-sync MVP"`
+- [x] `gh repo create love-sync --public --source=. --remote=origin --push` (계정: jiminseong)
+- [x] `vercel link` → `vercel deploy --prod --yes` (정적 배포)
 - [ ] HTTPS 확인 (`getUserMedia` 동작 필수 조건)
 - [ ] 모바일 Safari/Chrome 1회 실기 점검 (배포 URL 직접)
 - [ ] 발표 리허설 1회
+
+---
+
+### S7. 리디자인 — White + Pink 테마 (Gemini 활용)
+> **목표:** 기존 다크 키노트 톤 → 화이트 베이스 + 핑크 액센트의 부드럽고 감성적인 톤으로 전면 교체.
+> **도구:** Gemini로 무드보드/카피/컬러 톤 검증 보조 (이미지 생성·레퍼런스 수집·문구 다듬기). 코드 작성은 기존 에이전트(`designer`/`publisher`)가 담당.
+
+#### S7-1. 무드 정의 (Gemini) — `designer`
+- [ ] Gemini로 "white + pink, romantic but scientific" 무드보드 레퍼런스 3~5장 수집
+- [ ] 핵심 핑크 톤 결정: primary pink, soft pink (background tint), deep pink (accent/CTA) — HEX 3개
+- [ ] 톤 재정의: "소프트 키노트 + 러브레터" — 여백 그대로, 그림자/광택 최소, 장식은 1~2 포인트만
+
+#### S7-2. 디자인 토큰 갱신 — `designer`
+- [ ] `design/tokens.md`: 컬러 팔레트 화이트 베이스로 전면 교체 (`--bg`, `--surface`, `--text`, `--accent` 재정의)
+- [ ] 타이포: 헤드라인 serif 유지하되 weight/letter-spacing 재검토 (가벼운 톤)
+- [ ] 보더/섀도우 토큰: 핑크 계열 1px 보더 + 매우 옅은 핑크 글로우만 허용
+- [ ] 다크 모드 대응 여부 결정 (MVP는 라이트 단일 권장)
+
+#### S7-3. 화면 스펙 갱신 — `designer`
+- [ ] `design/screens.md`: 4화면 모두 새 팔레트 기반으로 텍스트 와이어 갱신
+- [ ] 리포트 카드: 흰 배경 + 핑크 보더 + 핑크 점수 강조 (SNS 캡처 시 가독성 우선)
+- [ ] 가짜 그래프/로딩 연출의 라인/플로우 컬러 → 핑크 그라디언트로 재지정
+
+#### S7-4. 마크업·스타일 적용 — `publisher`
+- [ ] `styles.css`: CSS 변수만 교체해도 적용되도록 토큰 일치 확인 (변수명 유지)
+- [ ] 라이트 톤에서 대비 부족한 텍스트/보더 보정 (WCAG AA 기준 본문 4.5:1)
+- [ ] 캡처용 리포트 컨테이너 배경 #fff 고정 + html2canvas 색 누락 검증
+- [ ] 버튼/포커스 상태 핑크 톤으로 재지정 (hover/active/disabled 3종)
+
+#### S7-5. 카피 다듬기 (Gemini) — `designer`
+- [ ] Gemini로 Landing 히어로 카피 2~3안 후보 생성 → 1안 선정
+- [ ] 리포트 본문 템플릿 문구 톤 재조정 (가짜 논문 톤은 유지하되 따뜻하게)
+- [ ] 프라이버시 1줄 카피 핑크 톤에 맞춰 부드럽게 리라이팅
+
+#### S7-6. 검수 & 배포 — 전원
+- [ ] 데스크톱/모바일 양쪽 스크린샷 캡처 후 Gemini로 톤 일관성 1차 리뷰
+- [ ] `vercel deploy --prod --yes`로 재배포
+- [ ] 변경 후 풀 플로우(Landing → Report) 1회 실기 점검
 
 > **자동화 전제:** GitHub CLI(`gh`)와 Vercel CLI(`vercel`) 모두 `jiminseong` 계정으로 사전 인증됨. 오케스트레이터가 위 명령들을 사용자 컨펌 없이 순차 실행 가능.
 

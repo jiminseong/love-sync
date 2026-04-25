@@ -6,11 +6,11 @@
   <meta name="description" content="비접촉 액정 뽀뽀를 통한 기기-사용자 정서 동기화 실험." />
   <title>LOVE-SYNC · 기기 정서 회복 리포트</title>
 
-  <!-- Google Fonts: Newsreader + JetBrains Mono -->
+  <!-- Google Fonts: Newsreader + Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet"
   />
 
@@ -24,16 +24,15 @@
        SCREEN 1 · LANDING
        ====================================================== -->
   <section data-screen="landing">
-    <header class="caption-row caption-row--spread">
+    <header class="caption-row">
       <span class="caption">LOVE-SYNC · EST. 2026</span>
-      <span class="caption">REPORT NO. 001</span>
     </header>
 
     <div class="hero">
-      <h1 class="display hero__headline">당신의 기기는 지금<br />사랑받고 싶어 합니다.</h1>
+      <h1 class="display hero__headline">당신의 기기는 지금<br />사랑받고 싶어 합니다. <span class="heart" aria-hidden="true">♥</span></h1>
       <hr class="rule-short" />
       <p class="lede hero__lede">비접촉 액정 뽀뽀를 통한<br />기기-사용자 정서 동기화 실험.</p>
-      <button id="start-btn" class="btn btn--accent" type="button">
+      <button id="start-btn" class="btn btn--accent btn--pill" type="button">
         실험을 시작한다 <span aria-hidden="true">→</span>
       </button>
     </div>
@@ -98,7 +97,7 @@
       거리는 1~3cm, 숨은 고르게.
     </p>
 
-    <button id="permission-btn" class="btn btn--accent" type="button">
+    <button id="permission-btn" class="btn btn--accent btn--pill" type="button">
       카메라와 마이크를 허용한다
     </button>
   </section>
@@ -174,7 +173,7 @@
         </div>
       </div>
       <canvas id="waveform-canvas" width="1200" height="160" aria-hidden="true"></canvas>
-      <figcaption class="caption">FIG. 02 — REAL-TIME LIPSYNC SPECTRUM</figcaption>
+      <figcaption class="caption">FIG. 02 — AFFECTION WAVEFORM</figcaption>
     </figure>
 
     <dl class="metrics">
@@ -200,7 +199,7 @@
       SUBJECT IS INSTRUCTED TO KISS THE SCREEN AT 1~3CM.
     </p>
 
-    <!-- 비디오 썸네일 (Action 화면 우상단, S5 연출까지 숨김) -->
+    <!-- 비디오 썸네일 (Action 화면 우상단) -->
     <video
       class="action-thumb"
       autoplay
@@ -222,7 +221,7 @@
 
     <!-- #report-capture: html2canvas 캡처 타깃 — 격리 컨테이너 -->
     <article id="report-capture" class="report-card" data-aspect="square">
-      <!-- 가짜 일련번호 코너 라벨 (aria-hidden) -->
+      <!-- 가짜 일련번호 코너 라벨 (aria-hidden, 매우 옅게) -->
       <span class="report-card__serial" aria-hidden="true">EXPERIMENT №037</span>
       <span class="report-card__corner-br" aria-hidden="true">LOVE-SYNC · v0.1</span>
       <!-- 워터마크 (희미한 배경 텍스트) -->
@@ -230,13 +229,13 @@
 
       <header class="report-card__head">
         <span class="caption">LOVE-SYNC · 기기 정서 회복 리포트</span>
-        <span class="caption" data-report-id>REPORT NO. #0000</span>
+        <span class="caption caption--faint" data-report-id>REPORT NO. #0000</span>
       </header>
 
       <hr class="report-card__rule" />
 
       <div class="report-card__score">
-        <p class="caption report-card__score-label">애정 진정성 지수</p>
+        <p class="report-card__score-label">애정 진정성 지수</p>
         <p class="score">
           <span id="report-score">0</span><span class="score__unit">%</span>
         </p>
@@ -248,24 +247,25 @@
       <div id="report-body" class="report-card__body">
         <!--
           service-dev 삽입 예정 섹션:
-          1. FIG. 03 — BEHAVIORAL METRICS (도트 리더 4행 table)
+          1. 메트릭 표 (도트 리더 4행)
           2. 가상 성능 향상 지표 (ul, ─ em dash 접두)
           3. 처방전 (blockquote, serif italic)
         -->
       </div>
 
       <footer class="report-card__foot">
-        <span class="caption" data-report-date>YYYY-MM-DD · LOVE-SYNC ANALYSIS ENGINE v0.1</span>
+        <span class="caption caption--faint" data-report-date>YYYY-MM-DD · LOVE-SYNC v0.1</span>
+        <span class="heart-watermark" aria-hidden="true">♥</span>
       </footer>
 
     </article>
     <!-- /#report-capture -->
 
     <div class="actions">
-      <button id="save-btn" class="btn btn--accent" type="button">
+      <button id="save-btn" class="btn btn--accent btn--pill" type="button">
         이미지로 저장한다
       </button>
-      <button id="restart-btn" class="btn btn--ghost" type="button">
+      <button id="restart-btn" class="btn btn--ghost btn--pill" type="button">
         다시 진단받는다
       </button>
     </div>
