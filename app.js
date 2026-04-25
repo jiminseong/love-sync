@@ -10,21 +10,21 @@ const REPORT_COUNTUP_MS = 1200;
 
 // scan 화면 자동 트리거 임계값.
 // proximity는 0(멀다)~1(가깝다) 범위.
-// proximityToCm = 12 - p*10  →  p=0.7이 5cm. 5cm 이하에서만 발동.
-const PROXIMITY_TRIGGER = 0.7;
+// proximityToCm = 12 - p*10  →  p=0.5가 7cm. 7cm 이하에서 발동.
+const PROXIMITY_TRIGGER = 0.5;
 // proximity가 임계 근처(>= NEAR)면 안내 라벨을 "쪽 소리 들으면 끝낼게"로 바꿔 준다.
-const PROXIMITY_NEAR = 0.45;
+const PROXIMITY_NEAR = 0.3;
 // 트리거 후 화면이 fade되는 시간. 너무 길면 흐름이 끊기고, 너무 짧으면 어색.
 const SCAN_FINALIZE_FADE_MS = 800;
 
-// 토스트 판정용 dB 임계.
-// LOUD: detectKiss가 잡는 어택 임계와 같음 (lib/audio.js의 KISS_THRESHOLD_DB).
-// WEAK: 약한 시도(쪽 비슷한데 소리만 부족)를 잡아 안내 토스트로 유도.
-const LOUD_KISS_DB = -32;
-const WEAK_KISS_DB = -40;
+// 토스트/트리거 판정용 dB 임계. 마이크별 baseline 편차가 커서 보수적으로 잡으면
+// 사용자 입장에선 "둔감"하게 느껴진다. 일반적인 "쪽" 정도로도 잡히게 낮춰 둔다.
+// (proximity 조건과 AND이므로 노이즈 오트리거는 거리 조건이 거른다.)
+const LOUD_KISS_DB = -40;
+const WEAK_KISS_DB = -48;
 
+// 조건이 풀린 뒤에도 이만큼 더 보여 준다. 매 프레임 호출되는 동안에는 계속 노출.
 const TOAST_VISIBLE_MS = 1600;
-const TOAST_COOLDOWN_MS = 1800;
 
 const SCAN_PHASES = {
   warmup:     '잠깐 준비할게',
@@ -173,27 +173,28 @@ function setScanPhase(name) {
 }
 
 /**
- * scan 화면 하단에 짧은 안내 토스트를 띄운다.
- * 같은 종류(kind)는 TOAST_COOLDOWN_MS 안에 다시 띄우지 않아 시끄럽지 않게 한다.
+ * scan 화면 하단에 안내 토스트를 띄운다.
+ *
+ * - 매 프레임 호출돼도 깜빡이지 않게 종류(kind)가 바뀔 때만 텍스트를 다시 쓴다.
+ * - 호출 때마다 hide 타이머를 연장하니, 조건이 만족되는 동안에는 계속 보이고
+ *   조건이 풀리면 TOAST_VISIBLE_MS 뒤에 자연스럽게 사라진다.
  */
 function showScanToast(text, kind) {
   if (state.scanTriggered) return;
   const node = document.querySelector('#scan-toast');
   if (!node) return;
-  const now = performance.now();
-  if (
-    state.lastToast.kind === kind &&
-    now - state.lastToast.at < TOAST_COOLDOWN_MS
-  ) {
-    return;
+
+  if (state.lastToast.kind !== kind) {
+    node.textContent = text;
+    state.lastToast = { kind, at: performance.now() };
   }
-  state.lastToast = { kind, at: now };
-  node.textContent = text;
   node.dataset.visible = 'true';
+
   if (state.toastTimer) clearTimeout(state.toastTimer);
   state.toastTimer = setTimeout(() => {
     node.dataset.visible = 'false';
     state.toastTimer = null;
+    state.lastToast = { kind: null, at: 0 };
   }, TOAST_VISIBLE_MS);
 }
 
@@ -294,8 +295,13 @@ function startScanWatch() {
       setScanPhase('ready');
     }
 
-    // 강한 어택(detectKiss로 잡힌 "쪽")이 들어왔을 때 — 한 번에 처리.
-    if (a.kissDetected) {
+    // "쪽" 신호: detectKiss가 어택 패턴을 잡았거나, 그게 실패해도 단순히 큰 소리
+    // (peakDb ≥ LOUD_KISS_DB)면 우회 트리거로 인정. 어택 매칭이 까다로워서
+    // 분명히 큰 소리인데도 못 잡는 경우를 막는다.
+    const loudPeak = isFinite(a.peakDb) && a.peakDb >= LOUD_KISS_DB;
+    const kissSignal = a.kissDetected || loudPeak;
+
+    if (kissSignal) {
       a.kissDetected = false;
       if (v.proximity >= PROXIMITY_TRIGGER) {
         // 거리 + 소리 동시 충족 → 트리거.
