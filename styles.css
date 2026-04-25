@@ -609,9 +609,21 @@ section[data-screen="landing"] > * {
    ───────────────────────────────────────────── */
 
 section[data-screen="scan"] {
-  gap: var(--space-8);
-  justify-content: center;
+  gap: var(--space-6);
+  /* 위에서부터 자연스럽게 쌓아 권한 버튼이 fold 아래로 밀리지 않게 */
+  justify-content: flex-start;
   align-items: center;
+  padding-block: var(--space-8);
+}
+
+/* 비디오 미리보기가 fold를 잡아먹지 않도록 높이 캡 */
+section[data-screen="scan"] .video-wrap {
+  max-height: 46vh;
+}
+
+section[data-screen="scan"] .preview {
+  max-width: 520px;
+  margin-inline: auto;
 }
 
 /* scan-grid: 비디오 + 센서로그 2열 (태블릿+) */
@@ -1010,8 +1022,15 @@ section[data-screen="action"] > *:not(.action-bg-grid) {
 
 section[data-screen="report"] {
   align-items: center;
-  justify-content: center;
-  gap: var(--space-8);
+  /* 위에서부터 자연스럽게 — 의도 링크가 fold 아래로 밀리지 않게 */
+  justify-content: flex-start;
+  gap: var(--space-6);
+  padding-block: var(--space-8);
+}
+
+/* 의도 링크는 privacy-note 바로 아래에 붙도록 gap 보정 */
+section[data-screen="report"] > #reveal-intent-btn {
+  margin-top: 0;
 }
 
 section[data-screen="report"] > .caption-row,
@@ -1876,12 +1895,14 @@ section[data-screen="finale"] {
   50%, 100% { opacity: 0;    }
 }
 
-/* 공유 버튼 — 등장 페이드인 */
+/* 공유/다시하기 버튼 — 등장 페이드인, 세로 스택 */
 .finale-actions {
   margin-top: var(--space-8);
   width: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 900ms var(--ease-out),

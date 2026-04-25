@@ -3,7 +3,7 @@ import { generateReport, renderReportBodyHTML } from './lib/report.js';
 import { captureReportCard } from './lib/capture.js';
 import { startVision, stopVision, getVisionSnapshot } from './lib/vision.js';
 import { startAudio, stopAudio, getAudioSnapshot } from './lib/audio.js';
-import { runFinale } from './lib/finale.js';
+import { runFinale, stopFinale } from './lib/finale.js';
 
 const SCREENS = ['landing', 'scan', 'action', 'report', 'finale'];
 const ANALYSIS_DURATION_MS = 3200;
@@ -97,6 +97,28 @@ function applyDeviceLabel() {
   const profile = detectDeviceProfile();
   const line = profile.lines[Math.floor(Math.random() * profile.lines.length)];
   host.textContent = line;
+}
+
+/**
+ * 랜딩 헤드라인의 "내 기기" 자리를 userAgent로 매핑한 이름으로 치환한다.
+ * 알 수 없는 기기는 "내 기기" 그대로 둠.
+ */
+function applyDeviceHeadline() {
+  const host = document.querySelector('[data-device-name]');
+  if (!host) return;
+  const profile = detectDeviceProfile();
+  if (profile.name && profile.name !== '네 기기') {
+    host.textContent = `내 ${profile.name}`;
+  }
+}
+
+/**
+ * finale 본문의 "차가운 ○○ 액정"에 끼워 넣을 기기 이름.
+ * detectDeviceProfile이 일반명("네 기기")을 돌려주면 null로 처리해 fallback 문구 사용.
+ */
+function getFinaleDeviceName() {
+  const profile = detectDeviceProfile();
+  return profile.name && profile.name !== '네 기기' ? profile.name : null;
 }
 
 function setProgress(ratio) {
@@ -361,9 +383,12 @@ function goScan() {
 function goActionFromScan() {
   beginAudioCapture();
 
+  console.info('[ppoppoppo] scan→action: scheduling in', SCAN_TO_ACTION_DELAY_MS, 'ms');
   setTimeout(() => {
+    console.info('[ppoppoppo] entering action screen, analysis duration:', ANALYSIS_DURATION_MS, 'ms');
     setScreen('action');
     runAnalysisSequence((samples) => {
+      console.info('[ppoppoppo] analysis complete', samples);
       const visionSnap = getVisionSnapshot();
       const audioSnap = getAudioSnapshot();
 
@@ -457,12 +482,25 @@ function handleRevealIntent() {
   // onSwitchScreen 콜백을 호출 → 그때 setScreen('finale')로 화면 교체.
   runFinale({
     shameImageUrl: state.shameImageUrl,
+    deviceName: getFinaleDeviceName(),
     onSwitchScreen: () => {
       setScreen('finale');
     },
   }).catch((err) => {
     console.warn('[ppoppoppo] finale failed', err);
   });
+}
+
+/** finale 페이지의 "처음으로 다시 가기" 버튼 핸들러. */
+function handleFinaleRestart() {
+  stopFinale();
+  // reveal 버튼 다시 클릭 가능하게 복원
+  const btn = document.querySelector('#reveal-intent-btn');
+  if (btn) {
+    btn.disabled = false;
+    btn.removeAttribute('aria-hidden');
+  }
+  goLanding();
 }
 
 async function handleSaveClick() {
@@ -502,10 +540,14 @@ function bindEvents() {
 
   const revealBtn = document.querySelector('#reveal-intent-btn');
   if (revealBtn) revealBtn.addEventListener('click', handleRevealIntent);
+
+  const finaleRestartBtn = document.querySelector('#finale-restart-btn');
+  if (finaleRestartBtn) finaleRestartBtn.addEventListener('click', handleFinaleRestart);
 }
 
 function init() {
   applyDeviceLabel();
+  applyDeviceHeadline();
   bindEvents();
   setScreen('landing');
 }
