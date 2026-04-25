@@ -3,14 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="화면에 뽀뽀하면 사랑 점수 알려주는 가벼운 웹 장난감." />
+  <meta name="description" content="화면에 뽀뽀하면 사랑 점수 알려주는 가벼운 웹 장난감. 카메라·마이크는 네 폰 안에서만 돌아." />
+  <meta name="theme-color" content="#E91E63" />
+  <meta name="color-scheme" content="light" />
   <title>뽀뽀뽀 ♥ 너의 사랑을 측정해줄게</title>
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://xn--h43baa.kro.kr/" />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="뽀뽀뽀" />
+  <meta property="og:title" content="뽀뽀뽀 ♥ 너의 사랑을 측정해줄게" />
+  <meta property="og:description" content="화면에 뽀뽀 한 번, 진심도 측정 시작. 안심해, 다 네 폰 안에서만 일어나." />
+  <meta property="og:url" content="https://xn--h43baa.kro.kr/" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:image" content="https://xn--h43baa.kro.kr/og-image.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="뽀뽀뽀 — 화면에 뽀뽀 한 번, 진심도 측정 시작." />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="뽀뽀뽀 ♥ 너의 사랑을 측정해줄게" />
+  <meta name="twitter:description" content="화면에 뽀뽀 한 번, 진심도 측정 시작." />
+  <meta name="twitter:image" content="https://xn--h43baa.kro.kr/og-image.png" />
+  <meta name="twitter:image:alt" content="뽀뽀뽀 — 화면에 뽀뽀 한 번, 진심도 측정 시작." />
 
   <!-- Pretendard (한 가족, 9 weights) -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+  />
+
+  <!-- Nanum Myeongjo — finale 섹션의 명조체 감성 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap"
   />
 
   <link rel="stylesheet" href="styles.css" />
@@ -265,6 +304,31 @@
         다시 하기
       </button>
     </div>
+
+    <!-- 의도 노출용 절제된 링크 — 본 액션과 시각적 위계 분리 -->
+    <button id="reveal-intent-btn" class="intent-link" type="button">
+      서비스 의도 확인하기 <span aria-hidden="true">→</span>
+    </button>
+  </section>
+
+  <!-- ======================================================
+       SCREEN 5 · FINALE
+       "서비스 의도 확인하기" 클릭 후 등장하는 감동(?) 페이지.
+       텍스트는 lib/finale.js가 타자기 효과로 채워 넣음.
+       ====================================================== -->
+  <section data-screen="finale">
+    <!-- 흑백·블러 처리된 사용자 캡처를 깔아두는 배경 레이어 (CSS로 필터 적용) -->
+    <div class="finale-shame" aria-hidden="true"></div>
+
+    <article class="finale-content">
+      <div id="finale-text" class="finale-text"></div>
+
+      <div id="finale-actions" class="finale-actions" hidden>
+        <button id="share-btn" class="btn btn--accent btn--pill share-btn" type="button">
+          나만 당할 수 없지, 친구에게 '뽀뽀뽀' 링크 보내기
+        </button>
+      </div>
+    </article>
   </section>
 
 </main>

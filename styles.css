@@ -121,6 +121,7 @@ main[data-active-screen="landing"]  section[data-screen="landing"]  { display: f
 main[data-active-screen="scan"]     section[data-screen="scan"]     { display: flex; }
 main[data-active-screen="action"]   section[data-screen="action"]   { display: flex; }
 main[data-active-screen="report"]   section[data-screen="report"]   { display: flex; }
+main[data-active-screen="finale"]   section[data-screen="finale"]   { display: flex; }
 
 /* 모든 활성 section의 공통 레이아웃 — 중앙 정렬 */
 section[data-screen] {
@@ -174,6 +175,22 @@ main[data-active-screen="report"]   section[data-screen="report"] {
   animation: screen-enter var(--dur-base) var(--ease-in-out) both;
 }
 
+/* finale은 별도의 느린 페이드인 — 감정선 살리기 */
+main[data-active-screen="finale"]   section[data-screen="finale"] {
+  animation: finale-enter 1200ms var(--ease-out) both;
+}
+
+@keyframes finale-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   @keyframes screen-enter {
@@ -184,7 +201,8 @@ main[data-active-screen="report"]   section[data-screen="report"] {
   main[data-active-screen="landing"]  section[data-screen="landing"],
   main[data-active-screen="scan"]     section[data-screen="scan"],
   main[data-active-screen="action"]   section[data-screen="action"],
-  main[data-active-screen="report"]   section[data-screen="report"] {
+  main[data-active-screen="report"]   section[data-screen="report"],
+  main[data-active-screen="finale"]   section[data-screen="finale"] {
     animation-duration: 150ms !important;
   }
 }
@@ -1694,3 +1712,227 @@ section[data-screen="action"] {
 .caption-row .caption {
   font-weight: 500;
 }
+
+/* ─────────────────────────────────────────────
+   17. Intent reveal (Report → Finale 진입 트리거)
+   ───────────────────────────────────────────── */
+
+/* 리포트 하단의 절제된 링크 — 본 액션과 위계 분리 */
+.intent-link {
+  appearance: none;
+  background: transparent;
+  border: none;
+  margin-top: var(--space-6);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+
+.intent-link:hover,
+.intent-link:focus-visible {
+  color: var(--ink-mute);
+  border-bottom-color: var(--line-strong);
+  outline: none;
+}
+
+/* 리포트 페이드아웃 — 'is-fading-out' 토글되면 1.5s에 걸쳐 사라짐 */
+main[data-finale-fading="out"] section[data-screen="report"] {
+  animation: finale-fade-out 1500ms var(--ease-in-out) forwards;
+  pointer-events: none;
+}
+
+@keyframes finale-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+    filter: blur(6px);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   18. Finale screen — 따뜻한 베이지, 명조체, 타자기
+   ───────────────────────────────────────────── */
+
+/* finale 활성 시 페이지 배경을 따뜻한 베이지로 부드럽게 전환 */
+:root {
+  --finale-bg: #FDFBF7;
+}
+
+body {
+  transition: background-color 1500ms var(--ease-in-out);
+}
+
+/* :has 지원 브라우저: html/body까지 베이지 — 화면 밖 영역도 일관된 배경 */
+html:has(main[data-active-screen="finale"]) body {
+  background-color: var(--finale-bg);
+}
+
+/* 스크롤 가능한 long-form 본문 허용 + 자체 배경(:has 미지원 fallback) */
+section[data-screen="finale"] {
+  background-color: var(--finale-bg);
+  justify-content: flex-start;
+  padding-block: clamp(var(--space-12), 8vh, var(--space-24));
+  overflow: hidden; /* 배경 블러 끝선 정리 */
+  isolation: isolate;
+}
+
+/* 수치심 배경 레이어 — 캡처된 사용자 얼굴 (흑백 + 블러 + 10%) */
+.finale-shame {
+  position: absolute;
+  inset: -40px; /* 블러 가장자리 보정 */
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: grayscale(100%) blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1800ms var(--ease-out);
+}
+
+.finale-shame[data-has-image="true"] {
+  opacity: 0.10;
+}
+
+/* 본문 컨테이너 — 배경 위에 중앙 정렬 */
+.finale-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 56ch;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-6);
+}
+
+.finale-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+}
+
+/* 명조체 타이틀 — 감정 톤의 중심 */
+.finale-title {
+  font-family: "Nanum Myeongjo", "Noto Serif KR", serif;
+  font-size: clamp(1.5rem, 3.4vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.45;
+  color: #2A1F1F;
+  margin: 0;
+  min-height: 1.45em; /* 타이핑 중 점프 방지 */
+}
+
+/* 본문 단락 — 명조체로 감성 통일 */
+.finale-para {
+  font-family: "Nanum Myeongjo", "Noto Serif KR", serif;
+  font-size: clamp(1rem, 1.6vw, 1.125rem);
+  font-weight: 400;
+  line-height: 2;
+  letter-spacing: 0.005em;
+  color: #3D2F2F;
+  margin: 0;
+  min-height: 2em;
+  word-break: keep-all;
+}
+
+.finale-para--strong {
+  font-weight: 700;
+  color: #1F1414;
+}
+
+/* 타자기 커서 — 현재 타이핑 중인 노드 끝에 깜빡이는 마커 */
+.finale-title[data-typewriting="active"]::after,
+.finale-para[data-typewriting="active"]::after {
+  content: "";
+  display: inline-block;
+  width: 0.08em;
+  height: 1.05em;
+  margin-left: 0.08em;
+  background: currentColor;
+  vertical-align: -0.15em;
+  animation: finale-caret-blink 800ms steps(2, end) infinite;
+  opacity: 0.7;
+}
+
+@keyframes finale-caret-blink {
+  0%, 49%   { opacity: 0.85; }
+  50%, 100% { opacity: 0;    }
+}
+
+/* 공유 버튼 — 등장 페이드인 */
+.finale-actions {
+  margin-top: var(--space-8);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 900ms var(--ease-out),
+              transform 900ms var(--ease-out);
+}
+
+.finale-actions.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.share-btn {
+  /* 긴 한 줄 — 폰에서는 자연스럽게 줄바꿈 허용 */
+  white-space: normal;
+  max-width: 92vw;
+  line-height: 1.4;
+  padding-block: var(--space-3);
+}
+
+/* 모바일 반응형 — 좌우 패딩 살짝 더 */
+@media (max-width: 480px) {
+  section[data-screen="finale"] {
+    padding-inline: var(--space-6);
+    padding-block: var(--space-12);
+  }
+
+  .finale-title {
+    line-height: 1.5;
+  }
+
+  .finale-para {
+    line-height: 1.95;
+  }
+}
+
+/* prefers-reduced-motion: 감성 효과 중 타이핑 커서·페이드 살짝 단축 */
+@media (prefers-reduced-motion: reduce) {
+  .finale-shame {
+    transition: none;
+  }
+  .finale-actions {
+    transition: opacity 200ms var(--ease-out);
+    transform: none;
+  }
+  .finale-title[data-typewriting="active"]::after,
+  .finale-para[data-typewriting="active"]::after {
+    animation: none;
+    opacity: 0;
+  }
+  main[data-finale-fading="out"] section[data-screen="report"] {
+    animation-duration: 200ms;
+  }
+}
+

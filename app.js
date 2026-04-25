@@ -3,8 +3,9 @@ import { generateReport, renderReportBodyHTML } from './lib/report.js';
 import { captureReportCard } from './lib/capture.js';
 import { startVision, stopVision, getVisionSnapshot } from './lib/vision.js';
 import { startAudio, stopAudio, getAudioSnapshot } from './lib/audio.js';
+import { runFinale } from './lib/finale.js';
 
-const SCREENS = ['landing', 'scan', 'action', 'report'];
+const SCREENS = ['landing', 'scan', 'action', 'report', 'finale'];
 const ANALYSIS_DURATION_MS = 3200;
 const SCAN_TO_ACTION_DELAY_MS = 900;
 const REPORT_COUNTUP_MS = 1200;
@@ -29,6 +30,9 @@ const state = {
     kissDetected: false,
     lastKissAt: 0,
   },
+  // 분석이 끝나는 순간 캡처해 두는 사용자 얼굴 dataURL.
+  // finale 페이지의 흑백·블러 배경으로만 쓰이고, 어디로도 송신/저장되지 않는다.
+  shameImageUrl: null,
 };
 
 function setScreen(name) {
@@ -153,6 +157,34 @@ function updateActionMetricsMock(ratio) {
 
   if (!a.active) {
     writeMetric('db', `${(-45 + ratio * 25).toFixed(1)} dB`);
+  }
+}
+
+/**
+ * #video 요소에서 현재 프레임을 캡처해 dataURL로 반환한다.
+ * 전면 카메라 미러링 보정을 위해 좌우 반전해서 그린다.
+ * 실패하면 null을 반환 — 호출 측은 graceful하게 무시.
+ */
+function captureLastVideoFrame() {
+  const video = document.querySelector('#video');
+  if (!video || !video.videoWidth || !video.videoHeight) return null;
+  try {
+    // 배경용이라 해상도는 적당히 압축
+    const targetW = Math.min(640, video.videoWidth);
+    const scale = targetW / video.videoWidth;
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW;
+    canvas.height = Math.round(video.videoHeight * scale);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    // 셀카 모드처럼 좌우 반전 — 보는 사람 시점과 일치
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', 0.78);
+  } catch (err) {
+    console.warn('[ppoppoppo] captureLastVideoFrame failed', err);
+    return null;
   }
 }
 
@@ -369,6 +401,10 @@ function goActionFromScan() {
         };
       }
 
+      // 카메라 트랙을 끊기 직전에 마지막 프레임을 잡아둔다.
+      // finale 페이지의 흑백·블러 배경으로만 쓰이고 외부로 나가지 않는다.
+      state.shameImageUrl = captureLastVideoFrame();
+
       stopVision();
       stopAudio();
       state.vision.active = false;
@@ -397,11 +433,36 @@ function goLanding() {
   state.audio.peakDb = -60;
   state.audio.rmsDb = -60;
   state.audio.kissDetected = false;
+  state.shameImageUrl = null;
   writeSensor('camera', '대기');
   writeSensor('mic', '대기');
   writeSensor('distance', '—');
   writeSensor('db', '—');
   setScreen('landing');
+}
+
+/**
+ * "서비스 의도 확인하기" 클릭 핸들러.
+ * 반드시 이 클릭 이벤트의 동기 체인 안에서 runFinale()을 호출해야
+ * 그 안에서 만드는 Audio.play()가 브라우저 autoplay 정책을 통과한다.
+ */
+function handleRevealIntent() {
+  const btn = document.querySelector('#reveal-intent-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.setAttribute('aria-hidden', 'true');
+  }
+
+  // runFinale은 내부에서 1.5초 페이드아웃을 기다린 뒤
+  // onSwitchScreen 콜백을 호출 → 그때 setScreen('finale')로 화면 교체.
+  runFinale({
+    shameImageUrl: state.shameImageUrl,
+    onSwitchScreen: () => {
+      setScreen('finale');
+    },
+  }).catch((err) => {
+    console.warn('[ppoppoppo] finale failed', err);
+  });
 }
 
 async function handleSaveClick() {
@@ -438,6 +499,9 @@ function bindEvents() {
 
   const restartBtn = document.querySelector('#restart-btn');
   if (restartBtn) restartBtn.addEventListener('click', goLanding);
+
+  const revealBtn = document.querySelector('#reveal-intent-btn');
+  if (revealBtn) revealBtn.addEventListener('click', handleRevealIntent);
 }
 
 function init() {
