@@ -1,0 +1,15 @@
+{
+  "name": "뽀뽀뽀 ♥ 너의 사랑을 측정해줄게",
+  "short_name": "뽀뽀뽀",
+  "description": "화면에 뽀뽀하면 사랑 점수 알려주는 가벼운 웹 장난감.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFBFA",
+  "theme_color": "#E91E63",
+  "lang": "ko",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" }
+  ]
+}

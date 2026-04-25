@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#FCE4EC" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#FDFBFA" stop-opacity="1"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- 카드 보더 (편지지 느낌) -->
+  <rect x="40" y="40" width="1120" height="550" rx="32" fill="#FDFBFA" stroke="#E91E63" stroke-opacity="0.24" stroke-width="1.5"/>
+
+  <!-- 상단 캡션 -->
+  <text x="96" y="118" font-family="-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans CJK KR', sans-serif" font-size="22" font-weight="500" fill="#6B5E61" letter-spacing="2">
+    LOVE METER · 사랑 측정기
+  </text>
+
+  <!-- 메인 타이틀 -->
+  <text x="96" y="270" font-family="-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans CJK KR', sans-serif" font-size="120" font-weight="800" fill="#1A1A1F" letter-spacing="-3">
+    뽀뽀뽀<tspan fill="#E91E63"> ♥</tspan>
+  </text>
+
+  <!-- 서브 타이틀 -->
+  <text x="96" y="356" font-family="-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans CJK KR', sans-serif" font-size="44" font-weight="500" fill="#1A1A1F" letter-spacing="-1">
+    화면에 뽀뽀 한 번,
+  </text>
+  <text x="96" y="412" font-family="-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans CJK KR', sans-serif" font-size="44" font-weight="500" fill="#1A1A1F" letter-spacing="-1">
+    진심도 측정 시작.
+  </text>
+
+  <!-- 구분선 -->
+  <line x1="96" y1="470" x2="240" y2="470" stroke="#E91E63" stroke-width="2"/>
+
+  <!-- 하단 캡션 -->
+  <text x="96" y="528" font-family="-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans CJK KR', sans-serif" font-size="22" font-weight="500" fill="#6B5E61" letter-spacing="0">
+    안심해, 다 네 폰 안에서만 일어나.
+  </text>
+
+  <!-- 우측 큰 하트 워터마크 -->
+  <text x="1100" y="500" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="440" fill="#E91E63" fill-opacity="0.10" text-anchor="end">♥</text>
+</svg>

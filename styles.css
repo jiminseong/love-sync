@@ -870,9 +870,9 @@ section[data-screen="report"] {
   padding-block: var(--space-8);
 }
 
-/* 의도 링크는 privacy-note 바로 아래에 붙도록 gap 보정 */
+/* 의도 링크는 버튼 바로 아래에 바짝 붙여 클릭을 유도 */
 section[data-screen="report"] > #reveal-intent-btn {
-  margin-top: 0;
+  margin-top: calc(var(--space-6) * -1 + var(--space-2));
 }
 
 section[data-screen="report"] > .caption-row,
@@ -1403,7 +1403,7 @@ table tr + tr {
    17. Intent reveal (Report → Finale 진입 트리거)
    ───────────────────────────────────────────── */
 
-/* 리포트 하단의 절제된 링크 — 본 액션과 위계 분리 */
+/* 리포트 하단의 링크 — 버튼 바로 아래에서 즉시 눈에 띄도록 강조 */
 .intent-link {
   appearance: none;
   background: transparent;
@@ -1411,21 +1411,23 @@ table tr + tr {
   margin-top: var(--space-6);
   padding: var(--space-2) var(--space-3);
   font-family: var(--font-sans);
-  font-size: var(--fs-caption);
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--ink-faint);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent);
   cursor: pointer;
-  border-bottom: 1px dashed transparent;
+  border-bottom: 1.5px solid var(--accent-24);
   transition: color var(--dur-fast) var(--ease-out),
-              border-color var(--dur-fast) var(--ease-out);
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
 }
 
 .intent-link:hover,
 .intent-link:focus-visible {
-  color: var(--ink-mute);
-  border-bottom-color: var(--line-strong);
+  color: var(--accent);
+  border-bottom-color: var(--accent);
   outline: none;
+  transform: translateY(-1px);
 }
 
 /* 리포트 페이드아웃 — 'is-fading-out' 토글되면 1.5s에 걸쳐 사라짐 */
@@ -1650,7 +1652,8 @@ section[data-screen="finale"] {
 
 .privacy-note--report {
   margin-top: var(--space-6);
-  opacity: 0.75;
+  opacity: 1;
+  color: var(--ink-mute);
 }
 
 /* finale의 안내는 본문이 끝난 뒤 페이드인 — 타이핑 흐름을 방해 안 함 */
