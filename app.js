@@ -20,8 +20,8 @@ const SCAN_FINALIZE_FADE_MS = 800;
 // 토스트/트리거 판정용 dB 임계. 마이크별 baseline 편차가 커서 보수적으로 잡으면
 // 사용자 입장에선 "둔감"하게 느껴진다. 일반적인 "쪽" 정도로도 잡히게 낮춰 둔다.
 // (proximity 조건과 AND이므로 노이즈 오트리거는 거리 조건이 거른다.)
-const LOUD_KISS_DB = -40;
-const WEAK_KISS_DB = -48;
+const LOUD_KISS_DB = -30;
+const WEAK_KISS_DB = -38;
 
 // 조건이 풀린 뒤에도 이만큼 더 보여 준다. 매 프레임 호출되는 동안에는 계속 노출.
 const TOAST_VISIBLE_MS = 1600;
