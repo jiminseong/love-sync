@@ -59,7 +59,7 @@ function applyDeviceLabel() {
   if (!host) return;
   const name = detectDeviceLabel();
   if (!name) return;
-  host.textContent = `DETECTED SUBJECT: ${name} 의 영혼이 감지됨`;
+  host.textContent = `${name} 가 너를 기다리는 중`;
 }
 
 function setProgress(ratio) {
@@ -98,14 +98,14 @@ function updateVisionMetrics() {
   writeMetric('distance', `${proximityToCm(v.proximity)} cm`);
   writeMetric('stability', v.distanceStability.toFixed(2));
   writeMetric('tremor', (1 - v.distanceStability).toFixed(2));
-  writeSensor('distance', `${proximityToCm(v.proximity)} CM`);
+  writeSensor('distance', `${proximityToCm(v.proximity)} cm`);
 }
 
 function updateAudioMetrics() {
   const a = state.audio;
   const peak = isFinite(a.peakDb) ? a.peakDb : -60;
   writeMetric('db', `${peak.toFixed(1)} dB`);
-  writeSensor('db', `${peak.toFixed(1)} DB`);
+  writeSensor('db', `${peak.toFixed(1)} dB`);
 }
 
 function updateActionMetricsMock(ratio) {
@@ -137,14 +137,14 @@ function clearAnalysisTimers() {
 function runAnalysisSequence(onDone) {
   clearAnalysisTimers();
   setProgress(0);
-  setProgressLabel('AI 애정 진정성 분석 중...');
+  setProgressLabel('사랑 측정 중... ♥');
 
   const start = performance.now();
   const stages = [
-    { at: 0.0, text: 'AI 애정 진정성 분석 중...' },
-    { at: 0.25, text: '입술 좌표 추출 중...' },
-    { at: 0.5, text: '파장 분해 중...' },
-    { at: 0.75, text: '진정성 회귀 분석 중...' },
+    { at: 0.0, text: '사랑 측정 중... ♥' },
+    { at: 0.25, text: '입술 위치 잡는 중...' },
+    { at: 0.5, text: '소리 듣는 중...' },
+    { at: 0.75, text: '점수 계산 중...' },
   ];
   let stageIdx = 0;
 
@@ -227,10 +227,10 @@ function renderReport(result) {
   if (body) body.innerHTML = renderReportBodyHTML(report);
 
   const idNode = document.querySelector('[data-report-id]');
-  if (idNode) idNode.textContent = `REPORT NO. #${report.reportId}`;
+  if (idNode) idNode.textContent = `no. ${report.reportId}`;
 
   const dateNode = document.querySelector('[data-report-date]');
-  if (dateNode) dateNode.textContent = `${report.date} · LOVE-SYNC ANALYSIS ENGINE v0.1`;
+  if (dateNode) dateNode.textContent = `${report.date}`;
 
   animateScoreCountup(report.score);
 }
@@ -258,7 +258,7 @@ function onAudioUpdate(update) {
 
 async function beginVisionPreview() {
   const video = document.querySelector('#video');
-  writeSensor('camera', 'REQUESTING');
+  writeSensor('camera', '연결 중');
   try {
     const res = await startVision({
       video,
@@ -266,25 +266,25 @@ async function beginVisionPreview() {
     });
     state.vision.active = true;
     state.vision.fallback = Boolean(res && res.fallback);
-    writeSensor('camera', res && res.fallback ? 'SIMULATED' : 'ACTIVE');
+    writeSensor('camera', res && res.fallback ? '데모' : '준비됨 ♥');
   } catch (err) {
-    console.warn('[love-sync] vision start failed', err);
+    console.warn('[ppoppoppo] vision start failed', err);
     state.vision.active = false;
-    writeSensor('camera', 'FAILED');
+    writeSensor('camera', '실패');
   }
 }
 
 async function beginAudioCapture() {
-  writeSensor('mic', 'REQUESTING');
+  writeSensor('mic', '연결 중');
   try {
     const res = await startAudio({ onUpdate: onAudioUpdate });
     state.audio.active = true;
     state.audio.fallback = Boolean(res && res.fallback);
-    writeSensor('mic', res && res.fallback ? 'SIMULATED' : 'ACTIVE');
+    writeSensor('mic', res && res.fallback ? '데모' : '준비됨 ♥');
   } catch (err) {
-    console.warn('[love-sync] audio start failed', err);
+    console.warn('[ppoppoppo] audio start failed', err);
     state.audio.active = false;
-    writeSensor('mic', 'FAILED');
+    writeSensor('mic', '실패');
   }
 }
 
@@ -354,7 +354,7 @@ function goLanding() {
     state.countupRaf = null;
   }
   setProgress(0);
-  setProgressLabel('AI 애정 진정성 분석 중...');
+  setProgressLabel('사랑 측정 중... ♥');
   stopVision();
   stopAudio();
   state.vision.active = false;
@@ -364,8 +364,8 @@ function goLanding() {
   state.audio.peakDb = -60;
   state.audio.rmsDb = -60;
   state.audio.kissDetected = false;
-  writeSensor('camera', 'PENDING');
-  writeSensor('mic', 'PENDING');
+  writeSensor('camera', '대기');
+  writeSensor('mic', '대기');
   writeSensor('distance', '—');
   writeSensor('db', '—');
   setScreen('landing');
@@ -374,7 +374,7 @@ function goLanding() {
 async function handleSaveClick() {
   const saveBtn = document.querySelector('#save-btn');
   const scoreNode = document.querySelector('#report-score');
-  const filename = scoreNode ? `love-sync-${scoreNode.textContent}.png` : 'love-sync.png';
+  const filename = scoreNode ? `ppoppoppo-${scoreNode.textContent}.png` : 'ppoppoppo.png';
 
   const originalLabel = saveBtn ? saveBtn.textContent : '';
   if (saveBtn) {
@@ -384,7 +384,7 @@ async function handleSaveClick() {
   try {
     await captureReportCard({ filename });
   } catch (err) {
-    console.warn('[love-sync] capture failed', err);
+    console.warn('[ppoppoppo] capture failed', err);
   } finally {
     if (saveBtn) {
       saveBtn.disabled = false;

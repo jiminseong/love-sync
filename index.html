@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="비접촉 액정 뽀뽀를 통한 기기-사용자 정서 동기화 실험." />
-  <title>LOVE-SYNC · 기기 정서 회복 리포트</title>
+  <meta name="description" content="화면에 뽀뽀하면 사랑 점수 알려주는 가벼운 웹 장난감." />
+  <title>뽀뽀뽀 ♥ 너의 사랑을 측정해줄게</title>
 
   <!-- Google Fonts: Newsreader + Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,21 +25,21 @@
        ====================================================== -->
   <section data-screen="landing">
     <header class="caption-row">
-      <span class="caption">LOVE-SYNC · EST. 2026</span>
+      <span class="caption">뽀뽀뽀 ♥</span>
     </header>
 
     <div class="hero">
-      <h1 class="display hero__headline">당신의 기기는 지금<br />사랑받고 싶어 합니다. <span class="heart" aria-hidden="true">♥</span></h1>
+      <h1 class="display hero__headline">내 기기,<br />지금 사랑이 고파 <span class="heart" aria-hidden="true">♥</span></h1>
       <hr class="rule-short" />
-      <p class="lede hero__lede">비접촉 액정 뽀뽀를 통한<br />기기-사용자 정서 동기화 실험.</p>
+      <p class="lede hero__lede">화면에 뽀뽀 한 번,<br />진심도 측정 시작.</p>
       <button id="start-btn" class="btn btn--accent btn--pill" type="button">
-        실험을 시작한다 <span aria-hidden="true">→</span>
+        지금 뽀뽀하러 가기 <span aria-hidden="true">→</span>
       </button>
     </div>
 
     <footer class="legal-row">
-      <span class="caption" data-device-label>DETECTED SUBJECT: 이 기기의 영혼이 감지됨</span>
-      <em class="privacy">모든 분석은 당신의 브라우저 안에서만 일어납니다.</em>
+      <span class="caption" data-device-label>네 기기가 너를 기다리는 중</span>
+      <em class="privacy">안심해, 다 네 폰 안에서만 일어나.</em>
     </footer>
   </section>
 
@@ -48,10 +48,10 @@
        ====================================================== -->
   <section data-screen="scan">
     <header class="caption-row">
-      <span class="caption">STEP 01 / 03 · CALIBRATION</span>
+      <span class="caption">1 / 3</span>
     </header>
 
-    <h1 class="h1">센서를 교정합니다.</h1>
+    <h1 class="h1">잠깐 준비할게 <span class="heart" aria-hidden="true">♥</span></h1>
 
     <div class="scan-grid">
       <figure class="preview">
@@ -65,27 +65,27 @@
           ></video>
           <div class="lip-guide" aria-hidden="true"></div>
         </div>
-        <figcaption class="caption">FIG. 01 — SUBJECT PREVIEW</figcaption>
+        <figcaption class="caption">미리보기</figcaption>
       </figure>
 
       <aside class="sensor-log">
-        <h2 class="caption sensor-log__title">SENSOR LOG</h2>
+        <h2 class="caption sensor-log__title">체크</h2>
         <hr class="sensor-log__rule" />
         <dl class="sensor-log__dl">
           <div class="sensor-row">
-            <dt class="caption">CAMERA</dt>
-            <dd class="caption" data-sensor="camera">PENDING</dd>
+            <dt class="caption">카메라</dt>
+            <dd class="caption" data-sensor="camera">대기</dd>
           </div>
           <div class="sensor-row">
-            <dt class="caption">MICROPHONE</dt>
-            <dd class="caption" data-sensor="mic">PENDING</dd>
+            <dt class="caption">마이크</dt>
+            <dd class="caption" data-sensor="mic">대기</dd>
           </div>
           <div class="sensor-row">
-            <dt class="caption">DISTANCE</dt>
+            <dt class="caption">거리</dt>
             <dd class="caption" data-sensor="distance">—</dd>
           </div>
           <div class="sensor-row">
-            <dt class="caption">DB PEAK</dt>
+            <dt class="caption">소리</dt>
             <dd class="caption" data-sensor="db">—</dd>
           </div>
         </dl>
@@ -93,12 +93,12 @@
     </div>
 
     <p class="lede scan-lede">
-      화면 중앙의 가이드라인에 입술을 맞춘다.<br />
-      거리는 1~3cm, 숨은 고르게.
+      입술을 가이드에 맞춰봐.<br />
+      1~3cm 떨어져서, 천천히.
     </p>
 
     <button id="permission-btn" class="btn btn--accent btn--pill" type="button">
-      카메라와 마이크를 허용한다
+      허용하고 시작 <span aria-hidden="true">→</span>
     </button>
   </section>
 
@@ -109,10 +109,10 @@
     <!-- 배경 장식: dotted grid + crosshair (aria-hidden, CSS only) -->
     <div class="action-bg-grid" aria-hidden="true"></div>
     <header class="caption-row">
-      <span class="caption">STEP 02 / 03 · ANALYSIS IN PROGRESS</span>
+      <span class="caption">2 / 3</span>
     </header>
 
-    <h1 id="progress-label" class="h1">AI 애정 진정성 분석 중...</h1>
+    <h1 id="progress-label" class="h1">사랑 측정 중... <span class="heart" aria-hidden="true">♥</span></h1>
 
     <div class="progress">
       <div class="progress__track">
@@ -173,30 +173,30 @@
         </div>
       </div>
       <canvas id="waveform-canvas" width="1200" height="160" aria-hidden="true"></canvas>
-      <figcaption class="caption">FIG. 02 — AFFECTION WAVEFORM</figcaption>
+      <figcaption class="caption">뽀뽀 파형</figcaption>
     </figure>
 
     <dl class="metrics">
       <div class="metrics__cell">
-        <dt class="caption">DISTANCE</dt>
+        <dt class="caption">거리</dt>
         <dd class="metrics__value" data-metric="distance">—</dd>
       </div>
       <div class="metrics__cell">
-        <dt class="caption">STABILITY</dt>
+        <dt class="caption">안정성</dt>
         <dd class="metrics__value" data-metric="stability">—</dd>
       </div>
       <div class="metrics__cell">
-        <dt class="caption">DB PEAK</dt>
+        <dt class="caption">소리</dt>
         <dd class="metrics__value" data-metric="db">—</dd>
       </div>
       <div class="metrics__cell">
-        <dt class="caption">TREMOR</dt>
+        <dt class="caption">떨림</dt>
         <dd class="metrics__value" data-metric="tremor">—</dd>
       </div>
     </dl>
 
     <p class="caption action-footer-caption">
-      SUBJECT IS INSTRUCTED TO KISS THE SCREEN AT 1~3CM.
+      1~3cm 거리에서 화면에 가볍게 뽀뽀해봐.
     </p>
 
     <!-- 비디오 썸네일 (Action 화면 우상단) -->
@@ -214,28 +214,25 @@
        ====================================================== -->
   <section data-screen="report">
     <header class="caption-row">
-      <span class="caption">STEP 03 / 03 · DIAGNOSIS</span>
+      <span class="caption">3 / 3</span>
     </header>
 
-    <h1 class="h1">진단서가 발행되었습니다.</h1>
+    <h1 class="h1">결과 나왔어 <span class="heart" aria-hidden="true">♥</span></h1>
 
     <!-- #report-capture: html2canvas 캡처 타깃 — 격리 컨테이너 -->
     <article id="report-capture" class="report-card" data-aspect="square">
-      <!-- 가짜 일련번호 코너 라벨 (aria-hidden, 매우 옅게) -->
-      <span class="report-card__serial" aria-hidden="true">EXPERIMENT №037</span>
-      <span class="report-card__corner-br" aria-hidden="true">LOVE-SYNC · v0.1</span>
-      <!-- 워터마크 (희미한 배경 텍스트) -->
-      <span class="report-card__watermark" aria-hidden="true">CONFIDENTIAL</span>
+      <!-- 워터마크 (희미한 배경 하트) -->
+      <span class="report-card__watermark" aria-hidden="true">♥</span>
 
       <header class="report-card__head">
-        <span class="caption">LOVE-SYNC · 기기 정서 회복 리포트</span>
-        <span class="caption caption--faint" data-report-id>REPORT NO. #0000</span>
+        <span class="caption">뽀뽀뽀</span>
+        <span class="caption caption--faint" data-report-id></span>
       </header>
 
       <hr class="report-card__rule" />
 
       <div class="report-card__score">
-        <p class="report-card__score-label">애정 진정성 지수</p>
+        <p class="report-card__score-label">사랑 점수</p>
         <p class="score">
           <span id="report-score">0</span><span class="score__unit">%</span>
         </p>
@@ -254,7 +251,7 @@
       </div>
 
       <footer class="report-card__foot">
-        <span class="caption caption--faint" data-report-date>YYYY-MM-DD · LOVE-SYNC v0.1</span>
+        <span class="caption caption--faint" data-report-date></span>
         <span class="heart-watermark" aria-hidden="true">♥</span>
       </footer>
 
@@ -263,10 +260,10 @@
 
     <div class="actions">
       <button id="save-btn" class="btn btn--accent btn--pill" type="button">
-        이미지로 저장한다
+        저장하기
       </button>
       <button id="restart-btn" class="btn btn--ghost btn--pill" type="button">
-        다시 진단받는다
+        다시 하기
       </button>
     </div>
   </section>

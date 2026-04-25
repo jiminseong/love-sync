@@ -1,5 +1,5 @@
 /* =============================================================
-   LOVE-SYNC · styles.css
+   뽀뽀뽀 · styles.css
    publisher 담당 — JS 로직 없음, 디자인 토큰 기반 정적 스타일
    White + Pink 라이트 테마 리스킨 (design/tokens.md v2 기준)
    ============================================================= */
@@ -204,30 +204,36 @@ main[data-active-screen="report"]   section[data-screen="report"] {
   line-height: 1.4;
 }
 
-/* 계측 농담 라벨 (STEP ##/03, FIG. ##, SENSOR LOG, REPORT NO.) */
+/* 짧은 라벨/스텝 표시 — mono로 또렷하게 */
 .caption--label,
-.sensor-log .caption,
 .sensor-row dt,
 .sensor-row dd,
 .progress__ticks .caption,
-.action-footer-caption,
-.waveform figcaption.caption,
 .caption-row .caption {
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   color: var(--ink-mute);
 }
 
-/* 옅게 처리할 캡션 (REPORT NO. 등) */
+/* 한국어 문장형 캡션은 sans + 자연스러운 케이스 */
+.sensor-log .caption,
+.action-footer-caption,
+.waveform figcaption.caption {
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.01em;
+  color: var(--ink-mute);
+  text-transform: none;
+}
+
+/* 옅게 처리할 캡션 */
 .caption--faint {
   color: var(--ink-faint);
   opacity: 0.5;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
 }
 
 /* 히어로 헤드라인 — serif */
