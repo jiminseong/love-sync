@@ -1,0 +1,1287 @@
+/* =============================================================
+   LOVE-SYNC · styles.css
+   publisher 담당 — JS 로직 없음, 디자인 토큰 기반 정적 스타일
+   ============================================================= */
+
+/* ─────────────────────────────────────────────
+   1. 디자인 토큰 (design/tokens.md 전체 이식)
+   ───────────────────────────────────────────── */
+:root {
+  /* Color */
+  --bg:           #0B0B0C;
+  --bg-elev:      #141416;
+  --bg-paper:     #F2EFE7;
+  --ink:          #ECEAE3;
+  --ink-mute:     #8A8880;
+  --ink-faint:    #4A4944;
+  --accent:       #E8C547;
+  --line:         #2A2A2C;
+  --line-strong:  #3D3D40;
+
+  /* Accent alpha scale */
+  --accent-12: rgba(232, 197, 71, 0.12);
+  --accent-24: rgba(232, 197, 71, 0.24);
+  --accent-60: rgba(232, 197, 71, 0.60);
+
+  /* Typography — font stacks */
+  --font-serif: "Newsreader", "EB Garamond", Georgia, "Times New Roman", serif;
+  --font-mono:  "JetBrains Mono", "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+
+  /* Typography — size scale */
+  --fs-display: clamp(3.5rem, 8vw, 7.5rem);
+  --fs-h1:      clamp(2.25rem, 5vw, 4rem);
+  --fs-h2:      clamp(1.5rem, 3vw, 2.25rem);
+  --fs-score:   clamp(5rem, 14vw, 11rem);
+  --fs-body:    clamp(1rem, 1.2vw, 1.125rem);
+  --fs-mono:    clamp(0.875rem, 1vw, 1rem);
+  --fs-caption: 0.75rem;
+
+  /* Spacing */
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* Container widths */
+  --content-narrow: min(640px, 92vw);
+  --content-wide:   min(960px, 94vw);
+  --content-report: min(720px, 94vw);
+
+  /* Radius */
+  --radius-0: 0;
+  --radius-1: 2px;
+
+  /* Motion — duration */
+  --dur-fast:     200ms;
+  --dur-base:     600ms;
+  --dur-slow:     1200ms;
+  --dur-analysis: 4000ms;
+
+  /* Motion — easing */
+  --ease-out:    cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-linear: linear;
+}
+
+/* ─────────────────────────────────────────────
+   2. Reset & Base
+   ───────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100dvh;
+}
+
+/* ─────────────────────────────────────────────
+   3. 화면 전환 — data-active-screen 속성 셀렉터
+   ───────────────────────────────────────────── */
+
+/* 모든 section 기본: 숨김 */
+main section[data-screen] {
+  display: none;
+}
+
+/* 활성 화면만 표시 */
+main[data-active-screen="landing"]  section[data-screen="landing"]  { display: flex; }
+main[data-active-screen="scan"]     section[data-screen="scan"]     { display: flex; }
+main[data-active-screen="action"]   section[data-screen="action"]   { display: flex; }
+main[data-active-screen="report"]   section[data-screen="report"]   { display: flex; }
+
+/* 모든 활성 section의 공통 레이아웃 */
+section[data-screen] {
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-inline: var(--space-6);
+  padding-block: var(--space-8);
+  position: relative;
+}
+
+@media (min-width: 720px) {
+  section[data-screen] {
+    padding-inline: var(--space-16);
+  }
+}
+
+/* 화면 진입 애니메이션
+   keyframe 정의는 S5-1 블록에서 강화 버전으로 재정의됨.
+   여기서는 animation 적용 규칙만 선언. */
+@keyframes screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+main[data-active-screen="landing"]  section[data-screen="landing"],
+main[data-active-screen="scan"]     section[data-screen="scan"],
+main[data-active-screen="action"]   section[data-screen="action"],
+main[data-active-screen="report"]   section[data-screen="report"] {
+  animation: screen-enter var(--dur-base) var(--ease-in-out) both;
+}
+
+/* prefers-reduced-motion — S5-1 블록에서 @keyframes override */
+@media (prefers-reduced-motion: reduce) {
+  main[data-active-screen="landing"]  section[data-screen="landing"],
+  main[data-active-screen="scan"]     section[data-screen="scan"],
+  main[data-active-screen="action"]   section[data-screen="action"],
+  main[data-active-screen="report"]   section[data-screen="report"] {
+    animation-duration: 150ms;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   4. 타이포그래피 유틸리티
+   ───────────────────────────────────────────── */
+
+.caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-mute);
+  line-height: 1.4;
+}
+
+.display {
+  font-family: var(--font-serif);
+  font-size: var(--fs-display);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink);
+  max-width: 14ch;
+}
+
+.h1 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h1);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.lede {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  color: var(--ink-mute);
+  max-width: 60ch;
+  line-height: 1.6;
+}
+
+/* ─────────────────────────────────────────────
+   5. 공통 컴포넌트
+   ───────────────────────────────────────────── */
+
+/* 구획선 */
+hr {
+  border: none;
+  border-top: 1px solid var(--line);
+}
+
+.rule-short {
+  border: none;
+  border-top: 1px solid var(--line);
+  width: 24ch;
+  margin-block: var(--space-6);
+}
+
+/* caption-row: 상단 메타 정보 줄 */
+.caption-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--space-8);
+}
+
+.caption-row--spread {
+  justify-content: space-between;
+}
+
+/* 버튼 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-0);
+  background: transparent;
+  color: var(--accent);
+  padding: var(--space-4) var(--space-8);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+  /* 최소 터치 영역 */
+  min-height: 44px;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  background-color: var(--accent-12);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.btn--ghost {
+  border-color: var(--line-strong);
+  color: var(--ink-mute);
+}
+
+.btn--ghost:hover,
+.btn--ghost:focus-visible {
+  background-color: var(--accent-12);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────
+   6. SCREEN 1 · LANDING
+   ───────────────────────────────────────────── */
+
+section[data-screen="landing"] {
+  justify-content: space-between;
+}
+
+/* 히어로 영역 */
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: var(--space-24);
+  gap: var(--space-0);
+}
+
+.hero__headline {
+  /* 히어로 진입 애니메이션 (landing 화면 내부 전용) */
+  animation: hero-enter var(--dur-slow) var(--ease-out) both;
+  animation-delay: 100ms;
+}
+
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__headline {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+.hero__lede {
+  margin-bottom: var(--space-8);
+}
+
+/* 하단 법적 고지 */
+.legal-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line);
+}
+
+.privacy {
+  font-family: var(--font-serif);
+  font-size: var(--fs-caption);
+  font-style: italic;
+  color: var(--ink-faint);
+  letter-spacing: 0.02em;
+}
+
+/* 모바일 Landing */
+@media (max-width: 719px) {
+  .hero {
+    padding-block: var(--space-16);
+  }
+
+  .btn {
+    width: min(360px, 80vw);
+    justify-content: center;
+  }
+
+  .legal-row {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   7. SCREEN 2 · SCAN
+   ───────────────────────────────────────────── */
+
+section[data-screen="scan"] {
+  gap: var(--space-8);
+}
+
+/* scan-grid: 비디오 + 센서로그 2열 */
+.scan-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-8);
+  align-items: start;
+  width: 100%;
+  max-width: var(--content-wide);
+}
+
+@media (max-width: 719px) {
+  .scan-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 비디오 컨테이너 */
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.video-wrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-0);
+  overflow: hidden;
+  width: 100%;
+}
+
+#video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 흑백 필터 — 계측기 감성 */
+  filter: grayscale(60%);
+  display: block;
+}
+
+/* 입술 가이드 (타원, radius 예외 허용) */
+.lip-guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 28%;
+  aspect-ratio: 2 / 1;
+  border: 1px solid var(--accent-60);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* 센서 로그 패널 */
+.sensor-log {
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  padding: var(--space-6);
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sensor-log__title {
+  color: var(--ink);
+  letter-spacing: 0.08em;
+}
+
+.sensor-log__rule {
+  border-top-color: var(--line);
+}
+
+.sensor-log__dl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sensor-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.sensor-row dt {
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.sensor-row dd {
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.scan-lede {
+  max-width: var(--content-wide);
+}
+
+/* ─────────────────────────────────────────────
+   8. SCREEN 3 · ACTION
+   ───────────────────────────────────────────── */
+
+section[data-screen="action"] {
+  gap: var(--space-8);
+  max-width: var(--content-wide);
+  width: 100%;
+  align-self: center;
+}
+
+/* 진행 바 */
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.progress__track {
+  width: 100%;
+  height: 2px;
+  background: var(--line);
+  position: relative;
+  overflow: hidden;
+}
+
+#progress-bar {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width var(--dur-analysis) var(--ease-linear);
+  will-change: width;
+}
+
+.progress__ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 파형 캔버스 */
+.waveform {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  border: 1px solid var(--line);
+  padding: var(--space-4);
+  /* S5: overlay 배치 기준점 */
+  position: relative;
+  /* 배경은 bg-elev — canvas가 transparent일 때 overlay 배경 역할 */
+  background: var(--bg-elev);
+}
+
+#waveform-canvas {
+  display: block;
+  width: 100%;
+  height: 160px;
+  /* S5: transparent로 변경 — overlay(CSS spectrum bars)가 뒤에서 보임.
+     service-dev가 canvas에 실제 파형을 그리면 자연스럽게 덮힘. */
+  background: transparent;
+}
+
+/* 계측 4분할 그리드 */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  width: 100%;
+}
+
+.metrics__cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-right: 1px solid var(--line);
+}
+
+.metrics__cell:last-child {
+  border-right: none;
+}
+
+.metrics__value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  /* 값 변경 시 트랜지션 없음 — 뚝뚝 바뀌는 계측기 느낌 */
+  transition: none;
+}
+
+.action-footer-caption {
+  color: var(--ink-faint);
+  margin-top: auto;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line);
+}
+
+/* 비디오 썸네일 (우상단, 기본 숨김 — S5에서 표시) */
+.action-thumb {
+  display: none;
+  position: absolute;
+  top: var(--space-8);
+  right: var(--space-8);
+  width: 120px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  filter: grayscale(60%);
+}
+
+@media (max-width: 719px) {
+  .metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .metrics__cell:nth-child(2) {
+    border-right: none;
+  }
+
+  .metrics__cell:nth-child(3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .metrics__value {
+    font-size: var(--fs-h2);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   9. SCREEN 4 · REPORT
+   ───────────────────────────────────────────── */
+
+section[data-screen="report"] {
+  align-items: center;
+  gap: var(--space-8);
+}
+
+section[data-screen="report"] > .caption-row,
+section[data-screen="report"] > .h1 {
+  width: 100%;
+  max-width: var(--content-report);
+}
+
+/* 리포트 카드 — html2canvas 캡처 격리 컨테이너 */
+#report-capture {
+  position: relative;           /* fixed 없음, sticky 없음 */
+  background: var(--bg-elev);
+  border-top: 4px double var(--line-strong);
+  border-bottom: 1px solid var(--line);
+  /* 좌우 border 없음 — 논문 페이지 스타일 */
+  padding: var(--space-12);
+
+  /* square 프리셋 기본값 */
+  aspect-ratio: 1 / 1;
+  width: min(560px, 92vw);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+
+  /* html2canvas 호환: filter/mix-blend-mode 금지 */
+  isolation: isolate;
+}
+
+/* 9:16 프리셋 토글 */
+#report-capture[data-aspect="9-16"] {
+  aspect-ratio: 9 / 16;
+  width: min(360px, 80vw);
+  padding-inline: var(--space-12);
+  padding-block: var(--space-24);
+}
+
+/* 카드 헤더 */
+.report-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+/* 카드 구획선 */
+.report-card__rule {
+  border: none;
+  border-top: 1px solid var(--line);
+  width: 100%;
+}
+
+/* 점수 블록 */
+.report-card__score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-6);
+}
+
+.report-card__score-label {
+  font-family: var(--font-serif);
+  font-size: var(--fs-mono);
+  font-style: normal;
+  color: var(--ink-mute);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+/* 점수 숫자 */
+.score {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+#report-score {
+  font-family: var(--font-mono);
+  font-size: var(--fs-score);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.score__unit {
+  font-family: var(--font-mono);
+  font-size: var(--fs-h2);
+  font-weight: 400;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 리포트 본문 영역 (service-dev가 채움) */
+#report-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 52ch;
+  width: 100%;
+  overflow: hidden;   /* 캡처 영역 overflow 방지 */
+}
+
+/* report-body 내부 service-dev 삽입 요소 스타일 */
+#report-body .fig-caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  margin-bottom: var(--space-3);
+}
+
+/* 도트 리더 메트릭 표 */
+#report-body table {
+  border-collapse: collapse;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  width: 100%;
+}
+
+#report-body table tr + tr {
+  border-top: 1px solid var(--line);
+}
+
+#report-body table td,
+#report-body table th {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+#report-body table td:last-child {
+  text-align: right;
+  color: var(--ink);
+}
+
+/* 성능 향상 지표 리스트 */
+#report-body ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+#report-body ul li {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--ink-mute);
+  display: flex;
+  gap: var(--space-3);
+  letter-spacing: 0.04em;
+}
+
+#report-body ul li::before {
+  content: "─";
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+
+/* 처방전 인용문 */
+#report-body blockquote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--fs-body);
+  color: var(--ink-mute);
+  line-height: 1.6;
+  max-width: 52ch;
+  border-left: none;
+  padding: 0;
+}
+
+/* 카드 푸터 */
+.report-card__foot {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+
+/* 하단 액션 버튼 영역 */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  justify-content: center;
+  padding-block: var(--space-6);
+}
+
+/* ─────────────────────────────────────────────
+   10. 표 공통 스타일 (학술 논문 스타일)
+   ───────────────────────────────────────────── */
+
+table {
+  border-collapse: collapse;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  width: 100%;
+}
+
+table tr + tr {
+  border-top: 1px solid var(--line);
+}
+
+/* ─────────────────────────────────────────────
+   11. 포커스 링 (접근성, 제거 금지)
+   ───────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ─────────────────────────────────────────────
+   12. 스크롤바 (어두운 테마 일관성)
+   ───────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-faint);
+}
+
+/* ─────────────────────────────────────────────
+   13. 기타 유틸리티
+   ───────────────────────────────────────────── */
+
+/* 화면 단위 보완 (구 iOS Safari 대응) */
+@supports not (min-height: 100dvh) {
+  body,
+  section[data-screen] {
+    min-height: 100vh;
+  }
+}
+
+/* =============================================================
+   S5 연출 강화 — publisher 추가 블록
+   ============================================================= */
+
+/* ─────────────────────────────────────────────
+   S5-1. 화면 전환 트랜지션 강화
+   — 기존 screen-enter keyframe의 blur/translateY를 유지.
+     진입 효과는 animation: screen-enter (3. 섹션)가 담당.
+     여기서는 keyframe 강도를 보강하고
+     reduced-motion fallback을 보다 명확히 선언한다.
+   ───────────────────────────────────────────── */
+
+/* screen-enter를 더 드라마틱하게: blur 8px → 0 */
+@keyframes screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* reduced-motion: blur/translate 제거, opacity만 빠르게 */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes screen-enter {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  main[data-active-screen="landing"]  section[data-screen="landing"],
+  main[data-active-screen="scan"]     section[data-screen="scan"],
+  main[data-active-screen="action"]   section[data-screen="action"],
+  main[data-active-screen="report"]   section[data-screen="report"] {
+    animation-duration: 150ms !important;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   S5-2. 버튼 hover/focus 마이크로 인터랙션 강화
+   — 머스타드 옐로우 underline + 키보드 포커스 ring
+   ───────────────────────────────────────────── */
+
+.btn {
+  position: relative;
+  overflow: hidden;
+  /* 하단 underline accent 라인용 pseudo */
+}
+
+/* accent underline — hover 시 좌→우로 슬라이드인 */
+.btn::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.btn:hover::after,
+.btn:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* focus-visible ring 강화 (기존 2px → 3px, offset 증가) */
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* ghost 버튼 — focus 시 accent 색으로 ring */
+.btn--ghost:focus-visible {
+  outline-color: var(--accent-60);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn::after {
+    transition: none;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   S5-3. Action 화면 배경 — dotted grid
+   ───────────────────────────────────────────── */
+
+/* Action section에 relative context 보장 */
+section[data-screen="action"] {
+  position: relative;
+}
+
+/* dotted grid 배경 레이어 — SVG data URI로 점 패턴 (gradient 금지 준수) */
+.action-bg-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  /* 점 패턴: SVG 1px circle, 32px 간격 */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='0' cy='0' r='1' fill='%234A4944' fill-opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 32px 32px;
+  background-position: 16px 16px;
+  opacity: 0.6;
+}
+
+/* crosshair — ::before 수평선, ::after 수직선 (border hairline) */
+.action-bg-grid::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--line-strong);
+  opacity: 0.4;
+}
+
+.action-bg-grid::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--line-strong);
+  opacity: 0.4;
+}
+
+/* grid가 content 뒤로 가도록 z-index */
+section[data-screen="action"] > *:not(.action-bg-grid) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─────────────────────────────────────────────
+   S5-4. Action 화면 — 메트릭 라벨 강조
+   ───────────────────────────────────────────── */
+
+/* 메트릭 셀 hover: dt caption에 accent 색 */
+.metrics__cell {
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.metrics__cell:hover {
+  background-color: var(--accent-12);
+}
+
+/* 값이 업데이트됐을 때 mono 깜빡임 효과 (data-metric 슬롯) */
+@keyframes metric-blink {
+  0%   { color: var(--accent); }
+  60%  { color: var(--accent); }
+  100% { color: var(--ink); }
+}
+
+/* service-dev가 .is-updated 클래스 토글 시 동작 */
+[data-metric].is-updated {
+  animation: metric-blink var(--dur-base) var(--ease-out) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-metric].is-updated {
+    animation: none;
+    color: var(--ink);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   S5-5. Waveform — CSS 스펙트럼 오버레이
+   ───────────────────────────────────────────── */
+
+/* canvas 위에 spectrum-overlay를 absolute로 덮음
+   service-dev가 canvas에 실제 파형 그리면 overlay를 숨김
+   (service-dev가 .is-active 클래스 추가 시) */
+
+.waveform {
+  position: relative;
+}
+
+/* canvas: 기본적으로 위에 렌더링, service-dev가 그리기 전에는 투명 */
+#waveform-canvas {
+  position: relative;
+  z-index: 2;
+  /* 배경이 bg-elev이므로 canvas가 비어있으면 overlay가 비침 */
+  background: transparent;
+}
+
+/* overlay: canvas 아래(z-index 1), 고정 높이 160px (canvas height와 동일) */
+.spectrum-overlay {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  right: var(--space-4);
+  height: 160px; /* canvas height와 동일 */
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+
+/* service-dev가 canvas에 그리기 시작하면 overlay 숨김 */
+.waveform.canvas-active .spectrum-overlay {
+  display: none;
+}
+
+/* 그리드 + 라벨 + 바 컨테이너 */
+.spectrum-grid {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+/* Y축 눈금 라벨 */
+.spectrum-grid__label {
+  position: absolute;
+  left: 0;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.05em;
+  transform: translateY(-50%);
+  line-height: 1;
+}
+
+.spectrum-grid__label--top { top: 0; }
+.spectrum-grid__label--mid { top: 50%; }
+.spectrum-grid__label--bot { top: 100%; }
+
+/* 중앙 0.0 기준선 */
+.spectrum-grid::after {
+  content: "";
+  position: absolute;
+  left: 20px;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--line);
+}
+
+/* SVG 파형 — CSS animation으로 path 대신 stroke-dashoffset 이동 */
+.spectrum-wave {
+  position: absolute;
+  inset: 0;
+  left: 20px;
+  overflow: visible;
+}
+
+.spectrum-wave__path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.spectrum-wave__path--base {
+  stroke: var(--accent-60);
+  stroke-width: 1.5px;
+}
+
+.spectrum-wave__path--harmonic {
+  stroke: var(--accent-24);
+  stroke-width: 1px;
+}
+
+/* CSS keyframes 스펙트럼 바 컨테이너 */
+.spectrum-bars {
+  position: absolute;
+  inset: 2px;
+  left: 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2px;
+}
+
+/* 개별 스펙트럼 바 */
+.spectrum-bar {
+  flex: 1;
+  min-width: 2px;
+  max-width: 12px;
+  background: var(--accent-24);
+  border-top: 1px solid var(--accent-60);
+  /* CSS custom property 기반 높이 — keyframe에서 animate */
+  height: calc(var(--bar-h, 0.5) * 100%);
+  animation:
+    spectrum-pulse 1800ms var(--ease-in-out) infinite alternate;
+  animation-delay: var(--bar-delay, 0ms);
+  transform-origin: bottom;
+}
+
+@keyframes spectrum-pulse {
+  0%   { height: calc(var(--bar-h, 0.5) * 20%); }
+  40%  { height: calc(var(--bar-h, 0.5) * 85%); }
+  70%  { height: calc(var(--bar-h, 0.5) * 60%); }
+  100% { height: calc(var(--bar-h, 0.5) * 95%); }
+}
+
+/* prefers-reduced-motion: 바 애니메이션 정지 */
+@media (prefers-reduced-motion: reduce) {
+  .spectrum-bar {
+    animation: none;
+    height: calc(var(--bar-h, 0.5) * 60%);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   S5-6. Report 카드 시각 폴리싱
+   ───────────────────────────────────────────── */
+
+/* 4px double 보더 — 이미 존재하는 border-top 보강
+   하단도 double로 강화 */
+#report-capture {
+  border-bottom: 4px double var(--line-strong);
+}
+
+/* 좌상단 일련번호 라벨 */
+.report-card__serial {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+/* 우하단 버전 라벨 */
+.report-card__corner-br {
+  position: absolute;
+  bottom: var(--space-3);
+  right: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  line-height: 1;
+}
+
+/* 워터마크 — 배경에 매우 희미하게 */
+.report-card__watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  opacity: 0.06;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 0;
+}
+
+/* 카드 내 실 콘텐츠는 워터마크 위로 */
+#report-capture > *:not(.report-card__watermark):not(.report-card__serial):not(.report-card__corner-br) {
+  position: relative;
+  z-index: 1;
+}
+
+/* 점수 블록 상하 강조 — 횡선 대신 좁은 tick 라인 */
+.report-card__score {
+  position: relative;
+}
+
+.report-card__score::before,
+.report-card__score::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--line);
+}
+
+.report-card__score::before { top: 0; }
+.report-card__score::after  { bottom: 0; }
+
+/* ─────────────────────────────────────────────
+   S5-7. Action 화면 — 비디오 썸네일 표시 (S5 완료 기점)
+   ───────────────────────────────────────────── */
+
+/* action-thumb: S5에서 표시 */
+.action-thumb {
+  display: block;
+  position: absolute;
+  top: var(--space-8);
+  right: var(--space-8);
+  width: 120px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  filter: grayscale(60%);
+  z-index: 2;
+}

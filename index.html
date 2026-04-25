@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="비접촉 액정 뽀뽀를 통한 기기-사용자 정서 동기화 실험." />
+  <title>LOVE-SYNC · 기기 정서 회복 리포트</title>
+
+  <!-- Google Fonts: Newsreader + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<main data-active-screen="landing">
+
+  <!-- ======================================================
+       SCREEN 1 · LANDING
+       ====================================================== -->
+  <section data-screen="landing">
+    <header class="caption-row caption-row--spread">
+      <span class="caption">LOVE-SYNC · EST. 2026</span>
+      <span class="caption">REPORT NO. 001</span>
+    </header>
+
+    <div class="hero">
+      <h1 class="display hero__headline">당신의 기기는 지금<br />사랑받고 싶어 합니다.</h1>
+      <hr class="rule-short" />
+      <p class="lede hero__lede">비접촉 액정 뽀뽀를 통한<br />기기-사용자 정서 동기화 실험.</p>
+      <button id="start-btn" class="btn btn--accent" type="button">
+        실험을 시작한다 <span aria-hidden="true">→</span>
+      </button>
+    </div>
+
+    <footer class="legal-row">
+      <span class="caption" data-device-label>DETECTED SUBJECT: 이 기기의 영혼이 감지됨</span>
+      <em class="privacy">모든 분석은 당신의 브라우저 안에서만 일어납니다.</em>
+    </footer>
+  </section>
+
+  <!-- ======================================================
+       SCREEN 2 · SCAN
+       ====================================================== -->
+  <section data-screen="scan">
+    <header class="caption-row">
+      <span class="caption">STEP 01 / 03 · CALIBRATION</span>
+    </header>
+
+    <h1 class="h1">센서를 교정합니다.</h1>
+
+    <div class="scan-grid">
+      <figure class="preview">
+        <div class="video-wrap">
+          <video
+            id="video"
+            autoplay
+            playsinline
+            muted
+            aria-label="카메라 미리보기"
+          ></video>
+          <div class="lip-guide" aria-hidden="true"></div>
+        </div>
+        <figcaption class="caption">FIG. 01 — SUBJECT PREVIEW</figcaption>
+      </figure>
+
+      <aside class="sensor-log">
+        <h2 class="caption sensor-log__title">SENSOR LOG</h2>
+        <hr class="sensor-log__rule" />
+        <dl class="sensor-log__dl">
+          <div class="sensor-row">
+            <dt class="caption">CAMERA</dt>
+            <dd class="caption" data-sensor="camera">PENDING</dd>
+          </div>
+          <div class="sensor-row">
+            <dt class="caption">MICROPHONE</dt>
+            <dd class="caption" data-sensor="mic">PENDING</dd>
+          </div>
+          <div class="sensor-row">
+            <dt class="caption">DISTANCE</dt>
+            <dd class="caption" data-sensor="distance">—</dd>
+          </div>
+          <div class="sensor-row">
+            <dt class="caption">DB PEAK</dt>
+            <dd class="caption" data-sensor="db">—</dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+
+    <p class="lede scan-lede">
+      화면 중앙의 가이드라인에 입술을 맞춘다.<br />
+      거리는 1~3cm, 숨은 고르게.
+    </p>
+
+    <button id="permission-btn" class="btn btn--accent" type="button">
+      카메라와 마이크를 허용한다
+    </button>
+  </section>
+
+  <!-- ======================================================
+       SCREEN 3 · ACTION
+       ====================================================== -->
+  <section data-screen="action">
+    <!-- 배경 장식: dotted grid + crosshair (aria-hidden, CSS only) -->
+    <div class="action-bg-grid" aria-hidden="true"></div>
+    <header class="caption-row">
+      <span class="caption">STEP 02 / 03 · ANALYSIS IN PROGRESS</span>
+    </header>
+
+    <h1 id="progress-label" class="h1">AI 애정 진정성 분석 중...</h1>
+
+    <div class="progress">
+      <div class="progress__track">
+        <div id="progress-bar" class="progress__fill" style="width: 0%"></div>
+      </div>
+      <div class="progress__ticks">
+        <span class="caption">0%</span>
+        <span class="caption">100%</span>
+      </div>
+    </div>
+
+    <figure class="waveform">
+      <!-- CSS-only spectrum overlay (publisher) — service-dev가 canvas에 실제 파형 그릴 때까지 시각 fallback -->
+      <div class="spectrum-overlay" aria-hidden="true">
+        <div class="spectrum-grid" aria-hidden="true">
+          <!-- Y축 눈금 라벨 -->
+          <span class="spectrum-grid__label spectrum-grid__label--top">+1.0</span>
+          <span class="spectrum-grid__label spectrum-grid__label--mid">0.0</span>
+          <span class="spectrum-grid__label spectrum-grid__label--bot">−1.0</span>
+          <!-- CSS 애니메이션 sine-wave 라인 -->
+          <svg class="spectrum-wave" viewBox="0 0 1200 160" preserveAspectRatio="none" aria-hidden="true">
+            <path class="spectrum-wave__path spectrum-wave__path--base" d="" />
+            <path class="spectrum-wave__path spectrum-wave__path--harmonic" d="" />
+          </svg>
+          <!-- CSS keyframes 스펙트럼 바 -->
+          <div class="spectrum-bars" aria-hidden="true">
+            <div class="spectrum-bar" style="--bar-delay:0ms;   --bar-h: 0.55"></div>
+            <div class="spectrum-bar" style="--bar-delay:60ms;  --bar-h: 0.72"></div>
+            <div class="spectrum-bar" style="--bar-delay:120ms; --bar-h: 0.38"></div>
+            <div class="spectrum-bar" style="--bar-delay:180ms; --bar-h: 0.88"></div>
+            <div class="spectrum-bar" style="--bar-delay:240ms; --bar-h: 0.61"></div>
+            <div class="spectrum-bar" style="--bar-delay:300ms; --bar-h: 0.45"></div>
+            <div class="spectrum-bar" style="--bar-delay:360ms; --bar-h: 0.79"></div>
+            <div class="spectrum-bar" style="--bar-delay:420ms; --bar-h: 0.52"></div>
+            <div class="spectrum-bar" style="--bar-delay:480ms; --bar-h: 0.66"></div>
+            <div class="spectrum-bar" style="--bar-delay:540ms; --bar-h: 0.41"></div>
+            <div class="spectrum-bar" style="--bar-delay:600ms; --bar-h: 0.83"></div>
+            <div class="spectrum-bar" style="--bar-delay:660ms; --bar-h: 0.57"></div>
+            <div class="spectrum-bar" style="--bar-delay:720ms; --bar-h: 0.70"></div>
+            <div class="spectrum-bar" style="--bar-delay:780ms; --bar-h: 0.34"></div>
+            <div class="spectrum-bar" style="--bar-delay:840ms; --bar-h: 0.91"></div>
+            <div class="spectrum-bar" style="--bar-delay:900ms; --bar-h: 0.48"></div>
+            <div class="spectrum-bar" style="--bar-delay:960ms; --bar-h: 0.63"></div>
+            <div class="spectrum-bar" style="--bar-delay:1020ms;--bar-h: 0.77"></div>
+            <div class="spectrum-bar" style="--bar-delay:1080ms;--bar-h: 0.50"></div>
+            <div class="spectrum-bar" style="--bar-delay:1140ms;--bar-h: 0.86"></div>
+            <div class="spectrum-bar" style="--bar-delay:1200ms;--bar-h: 0.42"></div>
+            <div class="spectrum-bar" style="--bar-delay:1260ms;--bar-h: 0.68"></div>
+            <div class="spectrum-bar" style="--bar-delay:1320ms;--bar-h: 0.75"></div>
+            <div class="spectrum-bar" style="--bar-delay:1380ms;--bar-h: 0.59"></div>
+            <div class="spectrum-bar" style="--bar-delay:1440ms;--bar-h: 0.80"></div>
+            <div class="spectrum-bar" style="--bar-delay:1500ms;--bar-h: 0.36"></div>
+            <div class="spectrum-bar" style="--bar-delay:1560ms;--bar-h: 0.93"></div>
+            <div class="spectrum-bar" style="--bar-delay:1620ms;--bar-h: 0.47"></div>
+            <div class="spectrum-bar" style="--bar-delay:1680ms;--bar-h: 0.64"></div>
+            <div class="spectrum-bar" style="--bar-delay:1740ms;--bar-h: 0.71"></div>
+          </div>
+        </div>
+      </div>
+      <canvas id="waveform-canvas" width="1200" height="160" aria-hidden="true"></canvas>
+      <figcaption class="caption">FIG. 02 — REAL-TIME LIPSYNC SPECTRUM</figcaption>
+    </figure>
+
+    <dl class="metrics">
+      <div class="metrics__cell">
+        <dt class="caption">DISTANCE</dt>
+        <dd class="metrics__value" data-metric="distance">—</dd>
+      </div>
+      <div class="metrics__cell">
+        <dt class="caption">STABILITY</dt>
+        <dd class="metrics__value" data-metric="stability">—</dd>
+      </div>
+      <div class="metrics__cell">
+        <dt class="caption">DB PEAK</dt>
+        <dd class="metrics__value" data-metric="db">—</dd>
+      </div>
+      <div class="metrics__cell">
+        <dt class="caption">TREMOR</dt>
+        <dd class="metrics__value" data-metric="tremor">—</dd>
+      </div>
+    </dl>
+
+    <p class="caption action-footer-caption">
+      SUBJECT IS INSTRUCTED TO KISS THE SCREEN AT 1~3CM.
+    </p>
+
+    <!-- 비디오 썸네일 (Action 화면 우상단, S5 연출까지 숨김) -->
+    <video
+      class="action-thumb"
+      autoplay
+      playsinline
+      muted
+      aria-hidden="true"
+    ></video>
+  </section>
+
+  <!-- ======================================================
+       SCREEN 4 · REPORT
+       ====================================================== -->
+  <section data-screen="report">
+    <header class="caption-row">
+      <span class="caption">STEP 03 / 03 · DIAGNOSIS</span>
+    </header>
+
+    <h1 class="h1">진단서가 발행되었습니다.</h1>
+
+    <!-- #report-capture: html2canvas 캡처 타깃 — 격리 컨테이너 -->
+    <article id="report-capture" class="report-card" data-aspect="square">
+      <!-- 가짜 일련번호 코너 라벨 (aria-hidden) -->
+      <span class="report-card__serial" aria-hidden="true">EXPERIMENT №037</span>
+      <span class="report-card__corner-br" aria-hidden="true">LOVE-SYNC · v0.1</span>
+      <!-- 워터마크 (희미한 배경 텍스트) -->
+      <span class="report-card__watermark" aria-hidden="true">CONFIDENTIAL</span>
+
+      <header class="report-card__head">
+        <span class="caption">LOVE-SYNC · 기기 정서 회복 리포트</span>
+        <span class="caption" data-report-id>REPORT NO. #0000</span>
+      </header>
+
+      <hr class="report-card__rule" />
+
+      <div class="report-card__score">
+        <p class="caption report-card__score-label">애정 진정성 지수</p>
+        <p class="score">
+          <span id="report-score">0</span><span class="score__unit">%</span>
+        </p>
+      </div>
+
+      <hr class="report-card__rule" />
+
+      <!-- service-dev가 채우는 영역 -->
+      <div id="report-body" class="report-card__body">
+        <!--
+          service-dev 삽입 예정 섹션:
+          1. FIG. 03 — BEHAVIORAL METRICS (도트 리더 4행 table)
+          2. 가상 성능 향상 지표 (ul, ─ em dash 접두)
+          3. 처방전 (blockquote, serif italic)
+        -->
+      </div>
+
+      <footer class="report-card__foot">
+        <span class="caption" data-report-date>YYYY-MM-DD · LOVE-SYNC ANALYSIS ENGINE v0.1</span>
+      </footer>
+
+    </article>
+    <!-- /#report-capture -->
+
+    <div class="actions">
+      <button id="save-btn" class="btn btn--accent" type="button">
+        이미지로 저장한다
+      </button>
+      <button id="restart-btn" class="btn btn--ghost" type="button">
+        다시 진단받는다
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<!-- app.js: service-dev 담당 (로직 없음, src만 예약) -->
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
