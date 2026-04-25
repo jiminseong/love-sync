@@ -25,14 +25,14 @@
   --accent-24: rgba(233, 30, 99, 0.24);
   --accent-60: rgba(233, 30, 99, 0.60);
 
-  /* Typography — font stacks */
-  --font-sans:  "Inter", "Pretendard", system-ui, -apple-system, sans-serif;
-  --font-serif: "Newsreader", "EB Garamond", Georgia, "Times New Roman", serif;
-  --font-mono:  "JetBrains Mono", "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+  /* Typography — font stacks (Pretendard 단일 패밀리, weight로 위계) */
+  --font-sans:  "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-serif: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono:  "Pretendard", "Pretendard Variable", "SF Mono", Menlo, monospace;
 
   /* Typography — size scale (상한 완화, 친근한 톤) */
-  --fs-display: clamp(2.75rem, 6vw, 5.5rem);
-  --fs-h1:      clamp(2rem, 4.5vw, 3.25rem);
+  --fs-display: clamp(2.25rem, 5vw, 4.25rem);
+  --fs-h1:      clamp(1.75rem, 4vw, 2.75rem);
   --fs-h2:      clamp(1.375rem, 2.5vw, 1.875rem);
   --fs-score:   clamp(4.5rem, 12vw, 9rem);
   --fs-body:    clamp(1rem, 1.2vw, 1.125rem);
@@ -236,25 +236,25 @@ main[data-active-screen="report"]   section[data-screen="report"] {
   letter-spacing: 0.04em;
 }
 
-/* 히어로 헤드라인 — serif */
+/* 히어로 헤드라인 — Pretendard 800 (몽글한 굵기) */
 .display {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: var(--fs-display);
-  font-weight: 400;
-  font-style: normal;  /* 기본 roman, italic은 선택 */
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  font-style: normal;
+  letter-spacing: -0.03em;
   line-height: 1.15;
   color: var(--ink);
-  max-width: 16ch;
+  max-width: 18ch;
   margin-inline: auto;
 }
 
-/* h1 — serif */
+/* h1 — Pretendard 700 */
 .h1 {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: var(--fs-h1);
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   line-height: 1.2;
   color: var(--ink);
   text-align: center;
@@ -437,6 +437,7 @@ hr {
 section[data-screen="landing"] {
   justify-content: space-between;
   overflow: hidden;
+  padding-block: clamp(var(--space-4), 3vh, var(--space-8));
 }
 
 /* 몽글한 배경 블롭 — solid + blur, 가독성 방해 없도록 z-index 아래 */
@@ -472,15 +473,15 @@ section[data-screen="landing"] > * {
   z-index: 1;
 }
 
-/* 히어로 영역 */
+/* 히어로 영역 — 100dvh 안에 헤드라인+버튼+footer 모두 들어가도록 vh 기반 padding */
 .hero {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-block: var(--space-24);
-  gap: var(--space-4);
+  padding-block: clamp(var(--space-6), 4vh, var(--space-16));
+  gap: var(--space-3);
   width: 100%;
   max-width: var(--content-narrow);
   margin-inline: auto;
@@ -539,11 +540,12 @@ section[data-screen="landing"] > * {
   letter-spacing: 0.02em;
 }
 
-/* 모바일 Landing */
+/* 모바일 Landing — 100dvh 안에 들어가도록 padding 줄임 */
 @media (max-width: 479px) {
   .hero {
-    padding-block: var(--space-16);
+    padding-block: clamp(var(--space-4), 2vh, var(--space-8));
     max-width: 90vw;
+    gap: var(--space-2);
   }
 
   .btn {
@@ -560,7 +562,7 @@ section[data-screen="landing"] > * {
 
 @media (min-width: 480px) and (max-width: 719px) {
   .hero {
-    padding-block: var(--space-16);
+    padding-block: clamp(var(--space-6), 3vh, var(--space-12));
     max-width: 480px;
   }
 
@@ -667,17 +669,19 @@ section[data-screen="scan"] {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* 라이트 테마에서 30%로 약화 — 0%도 허용 */
-  filter: grayscale(30%);
+  /* 셀카 모드처럼 좌우 반전 */
+  transform: scaleX(-1);
+  /* 라이트 테마에서 0%로 자연스럽게 */
+  filter: grayscale(0%);
   display: block;
   border-radius: inherit;
   overflow: hidden;
 }
 
-/* 입술 가이드 (타원, radius 예외 허용) */
+/* 입술 가이드 — 얼굴 입술 위치(하단 70~75%)에 맞춰 내림 */
 .lip-guide {
   position: absolute;
-  top: 50%;
+  top: 72%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 28%;
@@ -689,17 +693,17 @@ section[data-screen="scan"] {
 
 /* 센서 로그 패널 */
 .sensor-log {
-  background: var(--bg-elev);
+  background: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--radius-3);
-  padding: var(--space-6);
-  min-width: 180px;
+  padding: var(--space-6) var(--space-8);
+  min-width: 220px;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 1px 2px var(--accent-08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 4px 16px var(--accent-08);
   transition: transform var(--dur-fast) var(--ease-out);
 }
 
@@ -709,44 +713,55 @@ section[data-screen="scan"] {
 
 .sensor-log__title {
   color: var(--ink);
-  letter-spacing: 0.08em;
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: center;
 }
 
 .sensor-log__rule {
   border-top-color: var(--line);
+  margin-block: 0;
 }
 
 .sensor-log__dl {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 .sensor-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: var(--space-4);
 }
 
 .sensor-row dt {
   color: var(--ink-mute);
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: -0.01em;
   text-align: left;
 }
 
 .sensor-row dd {
   color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
   text-align: right;
+}
+
+/* 활성 상태(준비됨) 강조 */
+.sensor-row dd[data-state="ready"],
+.sensor-row dd:has(span.heart),
+.sensor-log .caption[data-status="ready"] {
+  color: var(--accent);
 }
 
 .scan-lede {
@@ -897,8 +912,8 @@ section[data-screen="action"] > *:not(.action-bg-grid) {
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border: 1px solid var(--line);
-  border-radius: var(--radius-1);
-  filter: grayscale(30%);
+  border-radius: var(--radius-2);
+  transform: scaleX(-1);
   z-index: 2;
 }
 
@@ -1004,16 +1019,15 @@ section[data-screen="report"] > .h1 {
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
     0 1px 2px var(--accent-08);
 
-  padding: var(--space-12);
+  padding: var(--space-8) var(--space-12);
 
-  /* square 프리셋 기본값 */
-  aspect-ratio: 1 / 1;
+  /* aspect-ratio 제거 — 콘텐츠 길이에 따라 자연 크기로 (캡처는 가변 비율 허용) */
   width: min(560px, 92vw);
   margin-inline: auto;
 
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-4);
 
   isolation: isolate;
 }
@@ -1023,7 +1037,7 @@ section[data-screen="report"] > .h1 {
   aspect-ratio: 9 / 16;
   width: min(360px, 80vw);
   padding-inline: var(--space-12);
-  padding-block: var(--space-24);
+  padding-block: var(--space-16);
   border-radius: var(--radius-4);
 }
 
@@ -1081,8 +1095,8 @@ section[data-screen="report"] > .h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
-  padding-block: var(--space-6);
+  gap: var(--space-2);
+  padding-block: var(--space-4);
   position: relative;
 }
 
@@ -1137,15 +1151,107 @@ section[data-screen="report"] > .h1 {
 
 /* 리포트 본문 영역 (service-dev가 채움) */
 #report-body {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-4);
   max-width: 52ch;
   width: 100%;
   margin-inline: auto;
-  overflow: hidden;
-  text-align: left;   /* 본문 단락은 가독성을 위해 left */
+  text-align: left;
+}
+
+#report-body .report-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+#report-body .report-section__title {
+  font-family: var(--font-sans);
+  font-size: var(--fs-mono);
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* 메트릭 행 — 라벨 ··········· 값 (도트 리더) */
+#report-body .metric-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+#report-body .metric-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  color: var(--ink-mute);
+}
+
+#report-body .metric-row__label {
+  font-weight: 500;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+#report-body .metric-row__dots {
+  flex: 1;
+  border-bottom: 1px dotted var(--line-strong);
+  align-self: center;
+  min-width: 24px;
+  height: 1px;
+}
+
+#report-body .metric-row__value {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* 덤으로 리스트 */
+#report-body .perf-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+}
+
+#report-body .perf-item {
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  color: var(--ink-mute);
+  line-height: 1.5;
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+#report-body .perf-item::before {
+  content: "♥";
+  color: var(--accent-60);
+  flex-shrink: 0;
+  font-size: 0.85em;
+}
+
+/* 한 줄 평 */
+#report-body .prescription {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 500;
+  font-size: var(--fs-body);
+  color: var(--ink);
+  line-height: 1.5;
+  background: var(--accent-08);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-2);
+  padding: var(--space-3) var(--space-4);
+  margin: 0;
 }
 
 /* report-body 내부 service-dev 삽입 요소 스타일 */

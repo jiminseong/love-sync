@@ -39,27 +39,60 @@ function setScreen(name) {
   state.current = name;
 }
 
-function detectDeviceLabel() {
+function detectDeviceProfile() {
   const ua = navigator.userAgent || '';
   if (/iPhone/i.test(ua)) {
-    const match = ua.match(/iPhone(?: OS)?[ _](\d+)/i);
-    return match ? `iPhone OS ${match[1]}` : 'iPhone';
+    return { name: '아이폰', lines: [
+      '아이폰이 입술 내밀고 있어 ♥',
+      '아이폰이 너만 기다려 ♥',
+      '아이폰이 살짝 떨고 있어 ♥',
+    ]};
   }
-  if (/iPad/i.test(ua)) return 'iPad';
-  if (/Macintosh/i.test(ua)) return 'MacBook';
-  if (/Galaxy|SM-/i.test(ua)) return 'Galaxy';
-  if (/Pixel/i.test(ua)) return 'Pixel';
-  if (/Android/i.test(ua)) return 'Android';
-  if (/Windows/i.test(ua)) return 'Windows PC';
-  return null;
+  if (/iPad/i.test(ua)) {
+    return { name: '아이패드', lines: [
+      '아이패드가 두근거리는 중 ♥',
+      '큰 화면, 큰 사랑 — 아이패드가 기다려 ♥',
+    ]};
+  }
+  if (/Macintosh/i.test(ua)) {
+    return { name: '맥북', lines: [
+      '맥북이 너 기다리는 중 ♥',
+      '맥북이 입 모으고 있어 ♥',
+      '맥북이 슬쩍 화면 가까이 ♥',
+    ]};
+  }
+  if (/Galaxy|SM-/i.test(ua)) {
+    return { name: '갤럭시', lines: [
+      '갤럭시가 살짝 설레는 중 ♥',
+      '갤럭시가 입술 내밀고 있어 ♥',
+    ]};
+  }
+  if (/Pixel/i.test(ua)) {
+    return { name: '픽셀', lines: [
+      '픽셀이 너 기다려 ♥',
+      '픽셀이 화면 반짝이는 중 ♥',
+    ]};
+  }
+  if (/Android/i.test(ua)) {
+    return { name: '안드로이드', lines: [
+      '안드로이드가 너 기다리는 중 ♥',
+    ]};
+  }
+  if (/Windows/i.test(ua)) {
+    return { name: '윈도우', lines: [
+      '윈도우 PC가 슬쩍 두근대는 중 ♥',
+      '키보드 옆에서 너만 기다려 ♥',
+    ]};
+  }
+  return { name: '네 기기', lines: ['네 기기가 너를 기다리는 중 ♥'] };
 }
 
 function applyDeviceLabel() {
   const host = document.querySelector('[data-device-label]');
   if (!host) return;
-  const name = detectDeviceLabel();
-  if (!name) return;
-  host.textContent = `${name} 가 너를 기다리는 중`;
+  const profile = detectDeviceProfile();
+  const line = profile.lines[Math.floor(Math.random() * profile.lines.length)];
+  host.textContent = line;
 }
 
 function setProgress(ratio) {
