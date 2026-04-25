@@ -13,20 +13,24 @@
 ## 화면 흐름
 
 ```
-Landing  →  Scan  →  Action  →  Report  →  Finale
- (인사)    (권한)    (3.2초     (점수      (의도 노출 +
-                     측정)     카드)        타자기 + BGM)
+Landing  →  Scan  →  Report  →  Finale
+ (인사)    (라이브     (점수      (의도 노출 +
+            측정 +     카드)        타자기 + BGM)
+            자동
+            트리거)
 ```
 
-1. **Landing** — 인사 + 시작 버튼.
-2. **Scan** — 카메라/마이크 권한 요청 + 입술 가이드. 권한 버튼 아래에 _서버를 두지 않는다_
-   는 안내가 함께 노출된다.
-3. **Action** — 약 3.2초간 측정 진행. 진행률 바, 가짜 파형, 거리/소리/안정성/떨림 4개
-   메트릭이 동시에 갱신된다.
-4. **Report** — 사랑 점수 카드 + 짧은 처방전 + `저장하기` / `다시 하기`. 그 아래에 작게
+1. **Landing** — 인사 + "지금 뽀뽀하러 가기" 버튼. 이 버튼이 카메라+마이크 권한을
+   **한 번에** 요청한다.
+2. **Scan** — 라이브 카메라 미리보기 + 입술 가이드 + 마이크 모니터링이 동시에 돌아간다.
+   사용자가 화면에 다가가 "쪽" 소리를 내면 시스템이 매 프레임 **(a) 입술 근접도(proximity)**
+   와 **(b) "쪽" 어택(`kissDetected`)** 둘 다 충족되는 순간을 자동으로 잡아 짧은
+   fade transition과 함께 결과를 마감한다. 사용자가 누를 별도 "분석 시작" 버튼은 없다.
+   화면 한쪽에 _서버를 두지 않는다_ 는 안내가 노출된다.
+3. **Report** — 사랑 점수 카드 + 짧은 처방전 + `저장하기` / `다시 하기`. 그 아래에 작게
    _결과는 어디에도 저장되지 않는다_ 는 안내, 그리고 더 작게 **서비스 의도 확인하기**
    링크를 둔다.
-5. **Finale** — 본 작품의 클라이맥스. 다음 시퀀스가 차례로 일어난다.
+4. **Finale** — 본 작품의 클라이맥스. 다음 시퀀스가 차례로 일어난다.
    1. 리포트 카드가 1.5초에 걸쳐 페이드아웃 + 살짝 블러.
    2. 배경이 베이지(`#FDFBF7`)로 부드럽게 전환되고, 직전에 캡처해 둔 사용자 얼굴이
       `grayscale(100%)` + `blur(10px)` + `opacity: 0.10`으로 깔린다.
@@ -44,9 +48,9 @@ Landing  →  Scan  →  Action  →  Report  →  Finale
 
 ```text
 .
-├── index.html              # 5개 화면(landing/scan/action/report/finale) 마크업
+├── index.html              # 4개 화면(landing/scan/report/finale) 마크업
 ├── styles.css              # 디자인 토큰, 화면 전환, 리포트 카드, 타자기·페이드 연출
-├── app.js                  # 화면 상태머신, 센서 시작/정지, 분석 시퀀스, 캡처/공유 트리거
+├── app.js                  # 화면 상태머신, 센서 시작/정지, 자동 트리거, 캡처/공유
 ├── lib/
 │   ├── vision.js           # 카메라 스트림, MediaPipe Face Mesh, 거리·안정성 추정
 │   ├── audio.js            # 마이크 스트림, Web Audio 분석, 키스 사운드 감지
@@ -69,11 +73,15 @@ Landing  →  Scan  →  Action  →  Report  →  Finale
 
 ### 진입점: `app.js`
 
-- 5개 화면을 `data-active-screen` 속성으로 전환하는 단순 상태머신.
+- 4개 화면을 `data-active-screen` 속성으로 전환하는 단순 상태머신.
+- Landing의 시작 버튼 클릭 한 번으로 카메라+마이크를 **동시에** 시작한다 — 별도의
+  "허용하고 시작" 버튼은 없다.
 - `lib/vision.js`, `lib/audio.js`로부터 들어온 실시간 갱신을 `state.vision`,
   `state.audio`에 모은다.
-- Action 화면에서 약 3.2초 동안 `runAnalysisSequence`를 돌리면서 `requestAnimationFrame`
-  루프로 표본을 누적하고, 끝날 때 `score.js` → `report.js`로 넘긴다.
+- Scan 화면 진입 후 `requestAnimationFrame` 루프(`watchScanTrigger`)로 매 프레임
+  표본을 누적하면서 **(a) `state.vision.proximity ≥ PROXIMITY_TRIGGER`** 와
+  **(b) `state.audio.kissDetected`** 가 동시에 만족되는 순간을 잡는다. 그 순간 한 번만
+  마감 — 짧은 fade transition 후 `score.js` → `report.js` → setScreen('report').
 - **카메라 트랙을 끊기 직전에 `captureLastVideoFrame()`이 `#video`의 마지막 프레임을
   좌우 반전해서 JPEG dataURL로 잡아 둔다.** 이 dataURL은 `state.shameImageUrl`에만
   머무르고 finale 페이지의 배경으로만 쓰인다.

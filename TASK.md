@@ -21,28 +21,35 @@
 ## 1. 인터페이스 계약 (에이전트 간 합의 사항)
 
 ### 1.1. DOM 계약 (publisher ↔ service-dev)
-4개 화면은 **동일한 `index.html`에 공존**하며, `data-active-screen` 속성으로 표시/숨김 전환한다.
+4개 화면(landing/scan/report/finale)은 **동일한 `index.html`에 공존**하며, `data-active-screen` 속성으로 표시/숨김 전환한다. (별도의 "action" 화면은 두지 않는다 — scan 안에서 자동 트리거 후 곧바로 report로 페이드.)
 
 ```html
 <main data-active-screen="landing">
   <section data-screen="landing">…</section>
   <section data-screen="scan">…</section>
-  <section data-screen="action">…</section>
   <section data-screen="report">…</section>
+  <section data-screen="finale">…</section>
 </main>
 ```
 
-`service-dev`는 `document.querySelector('main').dataset.activeScreen = 'action'` 형태로만 화면을 전환한다.
+`service-dev`는 `document.querySelector('main').dataset.activeScreen = 'scan'` 형태로만 화면을 전환한다.
 
 ### 1.2. 필수 DOM ID (service-dev가 querySelector로 잡을 것)
 - `#video` — 카메라 미리보기 `<video>`
-- `#start-btn` — Landing의 시작 버튼
-- `#permission-btn` — Scan의 권한 허용 버튼
-- `#progress-bar` — Action 진행률
-- `#progress-label` — "AI 애정 진정성 분석 중..." 텍스트
+- `#start-btn` — Landing의 시작 버튼 (클릭 즉시 카메라+마이크 동시 권한 요청)
+- `#scan-status` — Scan 화면 상단 상태 라벨 (예: "입술 가까이 가져와봐 ♥" → "쪽 소리 들으면 끝낼게" → "측정 마감 중...")
+- `#scan-progress` — 트리거 발동 후 짧은 fade transition 진행률 (선택)
 - `#report-score` — 리포트 점수 숫자
 - `#report-body` — 리포트 본문 영역
 - `#save-btn` — 이미지 저장 버튼
+
+### 1.2.1. 트리거 조건 (service-dev)
+Scan 화면 진입 후 매 프레임 다음 두 조건을 동시에 검사한다.
+
+- **proximity ≥ `PROXIMITY_TRIGGER`** (기본 0.55. `lib/vision.js`의 `state.vision.proximity`)
+- **`state.audio.kissDetected === true`** (`lib/audio.js`가 dB threshold + 짧은 어택 감지로 켜 줌)
+
+둘 다 충족되는 순간 한 번만 분석을 마감하고 report로 페이드한다.
 
 ### 1.3. 데이터 계약 (service-dev 내부)
 ```ts
@@ -77,18 +84,18 @@ type AnalysisResult = {
 
 ### S0. 디자인 시스템 — `designer`
 - [x] `design/tokens.md`: 컬러(다크 베이스 + 1 accent), 폰트(serif 헤드라인 + mono 본문 권장), 간격 스케일
-- [x] `design/screens.md`: 4화면(Landing/Scan/Action/Report) 와이어프레임 텍스트 기술
+- [x] `design/screens.md`: 화면 와이어프레임 텍스트 기술
 - [x] 톤 가이드: "스티브 잡스 키노트 + 가짜 과학 논문" — 여백 많이, 글자 크게, 장식 최소
 - [x] 리포트 카드 레이아웃 (이미지 저장 시 정사각/9:16 SNS 친화적)
 
 ### S1. 퍼블리싱 — `publisher`
-- [x] `index.html`: 4 `<section data-screen>` 구조
+- [x] `index.html`: `<section data-screen>` 구조 (landing/scan/report/finale)
 - [x] `styles.css`: 디자인 토큰 CSS 변수화, 화면 전환은 `[data-active-screen]` 속성 셀렉터로
 - [x] 권한 고지문, 프라이버시 1줄 카피 (Landing 하단 고정)
 - [x] 리포트 카드는 `html2canvas`로 캡처 가능한 격리된 컨테이너로 마크업
 
 ### S1'. 코어 로직 골격 — `service-dev` (병렬)
-- [x] `app.js`: 화면 전환 상태머신 (landing → scan → action → report)
+- [x] `app.js`: 화면 전환 상태머신 (landing → scan → report → finale, 자동 트리거)
 - [x] `lib/report.js`: 템플릿 배열 기반 리포트 생성기 (`generateReport(result)`)
 - [x] `lib/score.js`: 더미 점수 생성기 (현 단계는 `Math.random()`)
 - [x] 통합 테스트: Landing 버튼 → 2초 후 Report 표시 (mock)
@@ -140,7 +147,7 @@ type AnalysisResult = {
 - [ ] 다크 모드 대응 여부 결정 (MVP는 라이트 단일 권장)
 
 #### S7-3. 화면 스펙 갱신 — `designer`
-- [ ] `design/screens.md`: 4화면 모두 새 팔레트 기반으로 텍스트 와이어 갱신
+- [ ] `design/screens.md`: 화면 모두 새 팔레트 기반으로 텍스트 와이어 갱신
 - [ ] 리포트 카드: 흰 배경 + 핑크 보더 + 핑크 점수 강조 (SNS 캡처 시 가독성 우선)
 - [ ] 가짜 그래프/로딩 연출의 라인/플로우 컬러 → 핑크 그라디언트로 재지정
 
