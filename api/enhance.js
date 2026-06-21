@@ -1,3 +1,15 @@
+// gemini 기능 비활성화 — 클라이언트는 더 이상 이 엔드포인트를 호출하지 않는다.
+// 만약 캐시/구버전이 호출하더라도 410을 돌려보내 정적 폴백으로 자연스럽게 떨어지게 둔다.
+// 원본 구현은 git 히스토리(commit ce76181)에서 복구할 수 있다.
+
+export default function handler(_request, response) {
+  response.statusCode = 410;
+  response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.setHeader('Cache-Control', 'no-store');
+  response.end(JSON.stringify({ error: 'GEMINI_DISABLED' }));
+}
+
+/*
 import { GoogleGenAI } from '@google/genai';
 
 const PERSONALITIES = new Set(['sincere', 'performative', 'dependent', 'avoidant']);
@@ -273,3 +285,4 @@ export default async function handler(request, response) {
     sendJson(response, buildFallbackEnhancement(payload));
   }
 }
+*/

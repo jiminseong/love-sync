@@ -53,6 +53,15 @@
   />
 
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Google tag (gtag.js) — GA4 G-N1JHMLS84Y. 추후 GTM 컨테이너로 교체 예정 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-N1JHMLS84Y"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-N1JHMLS84Y');
+  </script>
 </head>
 <body>
 
@@ -141,6 +150,8 @@
       뽀뽀뽀는 별도의 서버를 두지 않습니다.
       카메라·마이크로 들어온 모든 데이터는 사용자의 기기 안에서만 처리되며,
       어디에도 저장되거나 전송되지 않습니다.
+      <br /><br />
+      <span class="privacy-note__faint">※ 페이지 뷰·버튼 클릭 같은 익명 사용 통계는 Google Analytics로 전송됩니다. 영상·소리는 포함되지 않습니다.</span>
     </p>
 
     <!-- 트리거 발동 시 짧은 fade overlay (JS가 토글) -->

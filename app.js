@@ -4,7 +4,8 @@ import { captureReportCard } from './lib/capture.js';
 import { startVision, stopVision, getVisionSnapshot } from './lib/vision.js';
 import { startAudio, stopAudio, getAudioSnapshot } from './lib/audio.js';
 import { runFinale, stopFinale } from './lib/finale.js';
-import { fetchEnhancement } from './lib/gemini.js';
+// import { fetchEnhancement } from './lib/gemini.js'; // gemini 기능 비활성화 — 정적 폴백만 사용
+import { track } from './lib/analytics.js';
 
 const SCREENS = ['landing', 'scan', 'report', 'finale'];
 const REPORT_COUNTUP_MS = 1200;
@@ -311,6 +312,11 @@ function startScanWatch() {
         state.scanTriggered = true;
         state.scanRaf = null;
         hideScanToast();
+        track('kiss_detected', {
+          device_name: getFinaleDeviceName() || '알수없음',
+          peak_db: Number(a.peakDb.toFixed(1)),
+          kiss_tier: loudPeak ? 'loud' : 'weak',
+        });
         finalizeScan();
         return;
       }
@@ -396,6 +402,13 @@ function finalizeScan() {
 
     renderReport(result);
     setScreen('report');
+    track('report_view', {
+      device_name: getFinaleDeviceName() || '알수없음',
+      sincerity_score: Number(result.sincerityScore),
+      personality: result.personality,
+      peak_db: Number(result.audioPeakDb.toFixed(1)),
+      distance_stability: Number(result.distanceStability.toFixed(3)),
+    });
   }, SCAN_FINALIZE_FADE_MS);
 }
 
@@ -460,14 +473,15 @@ function renderReport(result) {
 
   animateScoreCountup(report.score);
 
-  const enhancementPayload = buildEnhancementPayload(result, report);
-  fetchEnhancement(enhancementPayload).then((enhancement) => {
-    if (!enhancement || state.enhancementRequestId !== enhancementRequestId) return;
-    state.lastEnhancement = enhancement;
-    if (state.current === 'report') {
-      replacePrescription(enhancement.prescription);
-    }
-  });
+  // gemini 기능 비활성화 — 정적 prescription/finale 폴백만 사용한다.
+  // const enhancementPayload = buildEnhancementPayload(result, report);
+  // fetchEnhancement(enhancementPayload).then((enhancement) => {
+  //   if (!enhancement || state.enhancementRequestId !== enhancementRequestId) return;
+  //   state.lastEnhancement = enhancement;
+  //   if (state.current === 'report') {
+  //     replacePrescription(enhancement.prescription);
+  //   }
+  // });
 
 }
 
@@ -532,6 +546,7 @@ async function beginAudioCapture() {
 function goScan() {
   setScreen('scan');
   setScanPhase('warmup');
+  track('scan_start', { device_name: getFinaleDeviceName() || '알수없음' });
   // 둘 다 비동기로 시작 — 권한 다이얼로그가 두 번 떠도 사용자는 한 번에 처리한다.
   beginVisionPreview();
   beginAudioCapture();
@@ -576,6 +591,10 @@ function handleRevealIntent() {
     btn.setAttribute('aria-hidden', 'true');
   }
 
+  track('intent_revealed', {
+    device_name: getFinaleDeviceName() || '알수없음',
+  });
+
   // runFinale은 내부에서 1.5초 페이드아웃을 기다린 뒤
   // onSwitchScreen 콜백을 호출 → 그때 setScreen('finale')로 화면 교체.
   runFinale({
@@ -614,6 +633,10 @@ async function handleSaveClick() {
   }
   try {
     await captureReportCard({ filename });
+    track('report_saved', {
+      device_name: getFinaleDeviceName() || '알수없음',
+      sincerity_score: Number(scoreNode ? scoreNode.textContent : 0),
+    });
   } catch (err) {
     console.warn('[ppoppoppo] capture failed', err);
   } finally {
@@ -632,13 +655,23 @@ function bindEvents() {
   if (saveBtn) saveBtn.addEventListener('click', handleSaveClick);
 
   const restartBtn = document.querySelector('#restart-btn');
-  if (restartBtn) restartBtn.addEventListener('click', goLanding);
+  if (restartBtn) {
+    restartBtn.addEventListener('click', () => {
+      track('restart_clicked', { from_screen: 'report' });
+      goLanding();
+    });
+  }
 
   const revealBtn = document.querySelector('#reveal-intent-btn');
   if (revealBtn) revealBtn.addEventListener('click', handleRevealIntent);
 
   const finaleRestartBtn = document.querySelector('#finale-restart-btn');
-  if (finaleRestartBtn) finaleRestartBtn.addEventListener('click', handleFinaleRestart);
+  if (finaleRestartBtn) {
+    finaleRestartBtn.addEventListener('click', () => {
+      track('restart_clicked', { from_screen: 'finale' });
+      handleFinaleRestart();
+    });
+  }
 }
 
 function init() {
