@@ -7,5 +7,3 @@ node_modules
 .env.local
 .idea
 .vscode
-PRD.md
-TASK.md
